@@ -6,9 +6,11 @@ function App() {
 
   return (
     <>
-      <div className='title'> Fridge Organiser </div>
-      <button className='add'> Add Item</button>
-      <div className='items'> Items:</div>
+      <div className='app'>
+        <div className='title'> Fridge Organiser </div>
+        <button className='add'> Add Item</button>
+        <div className='items'> Items:</div>
+      </div>
     </>
   )
 }
