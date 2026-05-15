@@ -39,28 +39,33 @@ def get_recipes(request: FridgeRequest):
     1. 3 recipes that can be made with these ingredients
     2. 2 recipe ideas requiring only a few additional ingredients
 
-    Return ONLY valid JSON:
-    
-    Format:  
-    {{
-        "recipes": [
-            {{
-                "name": "",
-                "description": "",
-                "ingredients": [],
-                "steps": [
-                    "Step 1",
-                    "Step 2",
-                    "Step 3"
-                ],
-                "missingIngredients": [],
-                "cookTime": ""
-            }}
-        ]
-    }}
+    Return ONLY valid JSON.
 
-    - steps must be an array of short instructions (max 20 words each)
-    - no full paragraphs allowed
+    Rules:
+    - Generate exactly 5 recipes
+    - Each recipe must have as many required steps as needed, but no more, no less
+    - Steps must be simple, single actions
+    - No paragraphs allowed in steps
+    - No combining actions
+    - Keep language short and practical
+
+    Format:
+
+    {
+    "recipes": [
+        {
+        "name": "",
+        "description": "",
+        "ingredients": [],
+        "steps": [
+            "step 1",
+            "step 2"
+        ],
+        "missingIngredients": [],
+        "cookTime": ""
+        }
+    ]
+    }
     """
 
     response = requests.post(
