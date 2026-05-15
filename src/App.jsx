@@ -107,7 +107,7 @@ function App() {
                     
                     <ul>
                       {recipe.missingIngredients.map((ingredient, index) => (
-                        <li key={index}>{ingredient}</li>
+                        <li key={index}>{ingredient.charAt(0).toUpperCase() + ingredient.slice(1)}</li>
                       ))}
                     </ul>
                   </div>

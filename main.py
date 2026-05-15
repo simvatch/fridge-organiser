@@ -48,13 +48,19 @@ def get_recipes(request: FridgeRequest):
                 "name": "",
                 "description": "",
                 "ingredients": [],
-                "steps": [],
+                "steps": [
+                    "Step 1",
+                    "Step 2",
+                    "Step 3"
+                ],
                 "missingIngredients": [],
                 "cookTime": ""
             }}
         ]
     }}
 
+    - steps must be an array of short instructions (max 20 words each)
+    - no full paragraphs allowed
     """
 
     response = requests.post(
