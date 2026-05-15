@@ -169,3 +169,16 @@
   color: #00195f;
   text-align: right;
 }
+
+.recipe-meta {
+  display: flex;
+  gap: 15px;
+  font-weight: bold;
+  color: #00195f;
+  background: #f0faff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  width: fit-content;
+}

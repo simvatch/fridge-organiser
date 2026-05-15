@@ -91,7 +91,9 @@ function App() {
                 <h2> {recipe.name}</h2>
                 <p>{recipe.description}</p>
 
-                <p>👪 Serves: {recipe.servings || "?"}</p>
+                <div className='recipe-meta'>
+                  <span>👪 Serves: {recipe.servings || 'Not specified'}</span>
+                </div>
 
                 <div className='section'>
                   <h3>🍽️ Steps</h3>
