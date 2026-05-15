@@ -43,11 +43,11 @@ function App() {
 
     const data = await response.json()
 
-    const aiText = data.choices?.[0]?.message?.content || "No recipes found."
+    const aiText = data.content
 
     try {
       const parsed = JSON.parse(aiText)
-      setRecipes(parsed)
+      setRecipes(parsed.recipes)
     } catch (error) {
       console.error('Error parsing AI response:', error)
     }
@@ -114,7 +114,7 @@ function App() {
                 )}
 
                 <div className="cook-time">
-                  <h3>⏲️ Cook Time</h3>
+                  <span>⏲️ Cook Time: {recipe.cookTime}</span>
                 </div>
 
               </div>
