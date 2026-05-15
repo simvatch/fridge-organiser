@@ -48,13 +48,13 @@ def get_recipes(request: FridgeRequest):
     """
 
     response = requests.post(
-        "https://ai.hackclub.com/chat/completions",
+        "https://ai.hackclub.com/proxy/v1/chat/completions",
         headers={
             "Authorization": f"Bearer {API_KEY}",
             "Content-Type": "application/json"
         },
         json={
-            "model": "gpt-4o-mini",
+            "model": "qwen/qwen3-32b",
             "messages": [
                 {
                     "role": "user",
