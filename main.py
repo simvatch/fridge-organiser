@@ -51,9 +51,9 @@ def get_recipes(request: FridgeRequest):
 
     Format:
 
-    {
+    {{
     "recipes": [
-        {
+        {{
         "name": "",
         "description": "",
         "ingredients": [],
@@ -63,9 +63,9 @@ def get_recipes(request: FridgeRequest):
         ],
         "missingIngredients": [],
         "cookTime": ""
-        }
+        }}
     ]
-    }
+    }}
     """
 
     response = requests.post(
