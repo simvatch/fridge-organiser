@@ -35,19 +35,24 @@ def get_recipes(request: FridgeRequest):
 
     {ingredients}
 
-    Generate:
-    1. 3 recipes that can be made with these ingredients
-    2. 2 recipe ideas requiring only a few additional ingredients
+    Generate exactly 5 recipes:
+    - 3 recipes must use ONLY the provided ingredients
+    - 2 recipes may include a few extra ingredients (must be listed in missingIngredients)
 
     Return ONLY valid JSON.
 
     Rules:
-    - Generate exactly 5 recipes
-    - Each recipe must have as many required steps as needed, but no more, no less
-    - Steps must be simple, single actions
+    - Each recipe must have 5 to 8 steps (no fewer, no more)
+    - Steps must be simple, single actions only
+    - Each step must contain ONE action only (no combining actions)
+    - Steps must be clear, beginner-friendly, and practical
     - No paragraphs allowed in steps
-    - No combining actions
-    - Keep language short and practical
+    - Do NOT use vague phrases like "cook until done" or "season to taste"
+    - Always include quantities (grams, cups, units) when adding ingredients
+    - Always include cooking times in minutes when relevant
+    - Do NOT invent ingredients inside steps
+    - Any ingredient not in the fridge list MUST go in missingIngredients only
+    - Keep recipes realistic and consistent with available ingredients
 
     Format:
 
