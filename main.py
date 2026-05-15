@@ -50,6 +50,7 @@ def get_recipes(request: FridgeRequest):
             "Content-Type": "application/json"
         },
         json={
+            "model": "gpt-4o-mini"
             "messages": [
                 {
                     "role": "user",
