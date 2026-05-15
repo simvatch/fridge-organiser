@@ -91,17 +91,19 @@ function App() {
                 <h2> {recipe.name}</h2>
                 <p>{recipe.description}</p>
 
+                <p>👪 Serves: {recipe.servings || "?"}</p>
+
                 <div className='section'>
                   <h3>🍽️ Steps</h3>
 
                   <ol>
-                    {recipe.steps.map((step, stepIndex) => (
+                    {(recipe.steps || []).map((step, stepIndex) => (
                       <li key={stepIndex}>{step}</li>
                     ))}
                   </ol>
                 </div>
 
-                {recipe.missingIngredients.length > 0 && (
+                {(recipe.missingIngredients || []).length > 0 && (
                   <div className='section'>
                     <h3>🛒 Missing Ingredients</h3>
                     
@@ -114,7 +116,7 @@ function App() {
                 )}
 
                 <div className="cook-time">
-                  <span>⏲️ Cook Time: {recipe.cookTime}</span>
+                  <span>⏲️ Cook Time: {recipe.cookTime || 'Not specified'}</span>
                 </div>
 
               </div>

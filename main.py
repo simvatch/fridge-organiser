@@ -53,6 +53,9 @@ def get_recipes(request: FridgeRequest):
     - Do NOT invent ingredients inside steps
     - Any ingredient not in the fridge list MUST go in missingIngredients only
     - Keep recipes realistic and consistent with available ingredients
+    - Each recipe must include a "servings" field
+    - "servings" must be an integer representing number of people served
+    - base all ingredient quantities on that number
 
     Format:
 
@@ -61,6 +64,7 @@ def get_recipes(request: FridgeRequest):
         {{
         "name": "",
         "description": "",
+        "servings": "",
         "ingredients": [],
         "steps": [
             "step 1",
