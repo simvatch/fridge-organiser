@@ -75,6 +75,6 @@ def get_recipes(request: FridgeRequest):
     )
 
     data = response.json()
-    content = data["choices"][0]["messages"]["content"]
+    content = data["choices"][0]["message"]["content"]
 
     return {"content": content}
