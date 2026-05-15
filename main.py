@@ -22,6 +22,10 @@ API_KEY = os.getenv("hackclubAPI")
 class FridgeRequest(BaseModel):
     ingredients: list[str]
 
+@app.get("/")
+def home():
+    return {"status": "online"}
+
 @app.post("/recipes")
 def get_recipes(request: FridgeRequest):
 
