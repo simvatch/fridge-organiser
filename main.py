@@ -56,6 +56,10 @@ def get_recipes(request: FridgeRequest):
     - Each recipe must include a "servings" field
     - "servings" must be an integer representing number of people served
     - base all ingredient quantities on that number
+    - Each recipe must include an "imagePrompt" field.
+    - The imagePrompt must describe the final cooked dish in a visually appealing way for image generation.
+    - It must be 2 sentences that are descriptive and food-focused.
+    - Do not include steps or ingredients in the imagePrompt.
 
     Format:
 
@@ -71,7 +75,8 @@ def get_recipes(request: FridgeRequest):
             "step 2"
         ],
         "missingIngredients": [],
-        "cookTime": ""
+        "cookTime": "",
+        "imagePrompt": ""
         }}
     ]
     }}
@@ -98,3 +103,33 @@ def get_recipes(request: FridgeRequest):
     content = data["choices"][0]["message"]["content"]
 
     return {"content": content}
+
+@app.post("/image")
+def generate_image(data: dict):
+
+    prompt = data["prompt"]
+
+    response = requests.post(
+        "https://ai.hackclub.com/proxy/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "google/gemini-3-pro-image-preview",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "modalities": ["image", "text"],
+            "image_config": {
+                "aspect_ratio": "1:1",
+            }
+        }
+    )
+
+    data = response.json()
+
+    return data

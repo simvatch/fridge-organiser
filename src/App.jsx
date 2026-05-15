@@ -7,6 +7,8 @@ function App() {
   const [needToBuy, setNeedToBuy] = useState([])
   const [recipes, setRecipes] = useState([])
   const [loading, setLoading] = useState(false)
+  const [images, setImages] = useState({})
+  const [imageLoading, setImageLoading] = useState({})
 
   useEffect(() => {
     checkItems()
@@ -61,6 +63,29 @@ function App() {
 
   }
 
+  const generateImage = async (recipe, index) => {
+    setImageLoading(prev => ({ ...prev, [index]: true }))
+
+    try {
+      const res = await fetch('https://fridge-organiser.onrender.com/image', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({prompt: recipe.imagePrompt})
+
+      })
+
+        const data = await res.json()
+
+        const imageUrl = data?.choices?.[0]?.message?.image || null
+
+        setImages(prev => ({ ...prev, [index]: imageUrl }))
+
+    } catch (err) {
+      console.error(err)
+    }
+    setImageLoading(prev => ({ ...prev, [index]: false }))
+  }
+
   return (
     <>
       <div className='app'>
@@ -89,6 +114,15 @@ function App() {
               <div className='recipe-card' key={index}>
 
                 <h2> {recipe.name}</h2>
+
+                <div className='image-container'>
+                  {imageLoading[index] ? (
+                    <img src={images[index]} />
+                  ) : (
+                    <button onClick={() => generateImage(recipe, index)} className='add'>Generate Preview</button>
+                  )}
+                </div>
+
                 <p>{recipe.description}</p>
 
                 <div className='recipe-meta'>
