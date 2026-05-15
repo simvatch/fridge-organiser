@@ -39,12 +39,22 @@ def get_recipes(request: FridgeRequest):
     1. 3 recipes that can be made with these ingredients
     2. 2 recipe ideas requiring only a few additional ingredients
 
-    Return:
-    - recipe name
-    - list of ingredients
-    - instructions
-    - extra ingredients needed (if applicable)
-    - estimated cooking time
+    Return ONLY valid JSON:
+    
+    Format:  
+    {
+        "recipes": [
+            {
+                "name": "",
+                "description": "",
+                "ingredients": [],
+                "steps": [],
+                "missingIngredients": [],
+                "cookTime": ""
+            }
+        ]
+    }
+
     """
 
     response = requests.post(
@@ -64,4 +74,7 @@ def get_recipes(request: FridgeRequest):
         }
     )
 
-    return response.json()
+    data = response.json()
+    content = data["choices"][0]["messages"]["content"]
+
+    return {"content": content}
