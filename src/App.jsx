@@ -78,11 +78,7 @@ function App() {
 
         console.log("IMAGE RESPONSE:", data)
 
-        const imageUrl =
-          data?.image ||
-          data?.data?.[0]?.url ||
-          data?.output?.[0]?.image ||
-          null
+        const imageUrl = data.image
 
         setImages(prev => ({ ...prev, [index]: imageUrl }))
 
@@ -123,17 +119,18 @@ function App() {
 
                 <div className='image-container'>
                 {images[index] ? (
-                  <img src={images[index]} alt={recipe.name} style={{ width: '100%', borderRadius: '10px' }} />
-                ) : imageLoading[index] ? (
-                  <button className='add' disabled>
-                    Generating image...
-                  </button>
+                  <img
+                    src={images[index]}
+                    alt={recipe.name}
+                    style={{ width: '100%', borderRadius: '10px' }}
+                  />
                 ) : (
                   <button
                     onClick={() => generateImage(recipe, index)}
                     className='add'
+                    disabled={imageLoading[index]}
                   >
-                    Generate Preview
+                    {imageLoading[index] ? 'Generating image...' : 'Generate Preview'}
                   </button>
                 )}
               </div>
