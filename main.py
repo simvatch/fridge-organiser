@@ -42,18 +42,18 @@ def get_recipes(request: FridgeRequest):
     Return ONLY valid JSON:
     
     Format:  
-    {
+    {{
         "recipes": [
-            {
+            {{
                 "name": "",
                 "description": "",
                 "ingredients": [],
                 "steps": [],
                 "missingIngredients": [],
                 "cookTime": ""
-            }
+            }}
         ]
-    }
+    }}
 
     """
 

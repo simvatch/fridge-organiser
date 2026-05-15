@@ -5,7 +5,7 @@ function App() {
   const [items, setItems] = useState(['rice', 'pasta', 'milk'])
   const [standard, setstandard] = useState(['flour', 'sugar', 'salt', 'black pepper', 'olive oil', 'vegetable oil', 'rice', 'pasta', 'eggs', 'milk', 'butter', 'bread', 'garlic', 'onions', 'potatoes', 'canned tomatoes', 'canned beans', 'chicken stock', 'tea', 'coffee', 'oats', 'paprika', 'cumin', 'chili flakes', 'soy sauce', 'honey', 'peanut butter'])
   const [needToBuy, setNeedToBuy] = useState([])
-  const [recipes, setRecipes] = useState("")
+  const [recipes, setRecipes] = useState([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -45,7 +45,13 @@ function App() {
 
     const aiText = data.choices?.[0]?.message?.content || "No recipes found."
 
-    setRecipes(aiText)
+    try {
+      const parsed = JSON.parse(aiText)
+      setRecipes(parsed)
+    } catch (error) {
+      console.error('Error parsing AI response:', error)
+    }
+
 
   } catch (error) {
       console.error(error)
@@ -58,8 +64,11 @@ function App() {
   return (
     <>
       <div className='app'>
+
         <div className='title'> Fridge Organiser </div>
+
         <button onClick={addItems} className='add'> Add Item</button>
+
         <div className='items'> 
           <div className="list-header">Current Stock:</div>
           <ul>
@@ -68,13 +77,51 @@ function App() {
             ))}
           </ul>
         </div>
+
         <button onClick={generateRecipes} className='add' disabled={loading}>
           {loading ? 'Generating...' : 'Generate Recipes'}
         </button>
-        <div className='recipes'>
-          <div className="recipes-header">Recipes You Can Make:</div>
-          <pre>{recipes}</pre>
+
+        <div className='recipes-container'>
+          
+            {recipes.map((recipe, index) => (
+
+              <div className='recipe-card' key={index}>
+
+                <h2> {recipe.name}</h2>
+                <p>{recipe.description}</p>
+
+                <div className='section'>
+                  <h3>🍽️ Steps</h3>
+
+                  <ol>
+                    {recipe.steps.map((step, stepIndex) => (
+                      <li key={stepIndex}>{step}</li>
+                    ))}
+                  </ol>
+                </div>
+
+                {recipe.missingIngredients.length > 0 && (
+                  <div className='section'>
+                    <h3>🛒 Missing Ingredients</h3>
+                    
+                    <ul>
+                      {recipe.missingIngredients.map((ingredient, index) => (
+                        <li key={index}>{ingredient}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="cook-time">
+                  <h3>⏲️ Cook Time</h3>
+                </div>
+
+              </div>
+            ))}
+
         </div>
+
         <div className='items'>
           <div className="list-header">Need to Buy:</div>
           <ul>
@@ -83,6 +130,7 @@ function App() {
             ))}
           </ul>
         </div>
+
       </div>
     </>
   )
