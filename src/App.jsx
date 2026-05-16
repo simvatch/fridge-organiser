@@ -77,11 +77,16 @@ function App() {
 
         const data = await res.json()
 
-        console.log("IMAGE RESPONSE:", data)
-
         const imageUrl = data.image
 
-        setImages(prev => ({ ...prev, [index]: imageUrl }))
+        if (imageUrl) {
+          setImages(prev => ({
+            ...prev,
+            [index]: imageUrl
+          }))
+        } else {
+          console.error("No image returned")
+        }
 
     } catch (err) {
       console.error(err)
