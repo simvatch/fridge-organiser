@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./Login.css"
 
 export default function Login({ onLogin }) {
@@ -46,6 +46,8 @@ export default function Login({ onLogin }) {
                     </div>
                     <button type="submit" className="add login-btn">Sign In</button>
                 </form>
+
+                <p className="auth-toggle-text">Don't have an account? <Link to="/signup">Sign Up</Link></p>
             </div>
 
         </div>
