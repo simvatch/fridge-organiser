@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './Login'
+import Signup from './Signup'
 import './App.css'
 
 export default function App() {
@@ -81,6 +82,11 @@ export default function App() {
         <Route 
           path="/login" 
           element={!isAuthenticated ? <Login onLogin={loginUser} /> : <Navigate to="/" />} 
+        />
+
+        <Route 
+          path='/signup'
+          element={!isAuthenticated ? <Signup /> : <Navigate to="/" />}
         />
         
         <Route 
