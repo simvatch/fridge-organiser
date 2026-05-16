@@ -133,12 +133,14 @@ def generate_image(data: dict):
     result = response.json()
     image = None
 
-    try:
-        image = result["choices"][0]["message"].get("image")
-    except:
-        pass
+    print("Full result:", result)
+
+    # try:
+    #     image = result["choices"][0]["message"].get("image")
+    # except:
+    #     pass
     
-    return {
-        "image": image,
-        "raw": result
-    }
+    # return {
+    #     "image": image,
+    #     "raw": result
+    # }
