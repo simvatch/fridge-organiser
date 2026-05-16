@@ -132,8 +132,6 @@ def generate_image(data: dict):
 
     result = response.json()
 
-    print("Full result:", result)
-
     image = None
 
     try:
