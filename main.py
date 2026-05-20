@@ -3,8 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 import os
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from backend.auth import router as auth_router
+from backend.database import connect_db, disconnect_db
 
 load_dotenv()
 
@@ -17,6 +19,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Connecting to database")
+    await connect_db()
+    yield
+    print("Disconnecting from database")
+    await disconnect_db()
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(auth_router)
 
