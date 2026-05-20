@@ -23,6 +23,7 @@ class FridgeRequest(BaseModel):
     ingredients: list[str]
 
 @app.get("/")
+@app.head("/")
 def home():
     return {"status": "online"}
 
