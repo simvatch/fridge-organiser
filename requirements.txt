@@ -1,5 +1,6 @@
-uvicorn
 fastapi
+uvicorn
 python-dotenv
 requests
-passlib
+passlib[bcrypt]
+asyncpg
