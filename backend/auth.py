@@ -52,6 +52,9 @@ async def login(user: Login, db=Depends(get_db)):
         user.email.lower()
     )
 
+    if not db_user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
     if not pwd_context.verify(user.password, db_user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
      
