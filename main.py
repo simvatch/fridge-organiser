@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import requests
 import os
 from dotenv import load_dotenv
-from backend.routes.auth import router as auth_router
+from backend.auth import router as auth_router
 
 load_dotenv()
 
