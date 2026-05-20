@@ -21,10 +21,17 @@ class Login(BaseModel):
 @router.post("/signup")
 async def signup(user: Signup, db=Depends(get_db)):
 
-    existing = await db.fetchrow(
-        "SELECT id FROM users WHERE email = $1",
-        user.email.lower()
-    )
+    print("In signup")
+
+    try:
+        existing = await db.fetchrow(
+            "SELECT id FROM users WHERE email = $1",
+            user.email.lower()
+        )
+    
+    except Exception as e:
+        print("Database error", e)
+        raise HTTPException(500, str(e))
 
     if existing:
         raise HTTPException(status_code=400, detail="Email already exists")
