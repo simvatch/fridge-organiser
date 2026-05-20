@@ -9,17 +9,42 @@ export default function Signup() {
     const [confirmPassword, setConfirmPassword] = useState("")
     const navigate = useNavigate()
 
-    const handlSignup = (e) => {
+    const handlSignup = async (e) => {
         e.preventDefault()
     
         if (password != confirmPassword) {
-            alert("Passwords do not match!")
-            return
+            alert("Passwords do not match!");
+            return;
         }
 
-        alert(`Account created successfully for ${firstName}! Redirecting to login...`)
-        navigate("/login")
-    }
+        try {
+            const response = await fetch(
+                "https://fridge-organiser.onrender.com/auth/signup",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        first_name: firstName,
+                        last_name: surname,
+                        email,
+                        password,
+                    }),
+                }
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(`Account created successfully for ${firstName}! Redirecting to login...`)
+                navigate("/login")
+            }
+        } catch (error) {
+            console.log(error);
+            alert("Server error")
+        }
+    } 
 
     return (
         <div className="login-container">

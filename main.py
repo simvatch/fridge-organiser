@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import requests
 import os
 from dotenv import load_dotenv
+from backend.routes.auth import router as auth_router
 
 load_dotenv()
 
@@ -16,6 +17,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
 
 API_KEY = os.getenv("hackclubAPI")
 
