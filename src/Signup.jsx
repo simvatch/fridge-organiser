@@ -42,7 +42,7 @@ export default function Signup() {
             }
         } catch (error) {
             console.log(error);
-            alert("Server error")
+            alert("Server error", error)
         }
     } 
 
