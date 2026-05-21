@@ -38,16 +38,21 @@ async def signup(user: Signup, db=Depends(get_db)):
     
     hashed = pwd_context.hash(user.password)
 
-    await db.execute(
-        """
-        INSERT INTO users (first_name, last_name, email, password_hash)
-        VALUES ($1, $2, $3, $4)
-        """,
-        user.first_name,
-        user.last_name,
-        user.email.lower(),
-        hashed
-    )
+    try:
+        await db.execute(
+            """
+            INSERT INTO users (first_name, last_name, email, password_hash)
+            VALUES ($1, $2, $3, $4)
+            """,
+            user.first_name,
+            user.last_name,
+            user.email.lower(),
+            hashed
+        )
+
+    except Exception as e:
+        print("Insert error", e)
+        raise HTTPException(500, str(e))
 
     return {"message":  "User created"}
 
