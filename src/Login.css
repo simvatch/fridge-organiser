@@ -51,7 +51,7 @@
     padding: 12px 15px;
     border: 2px solid #d1f3ff;
     border-radius: 8px;
-    font-family: 1rem;
+    font-size: 1rem;
     box-sizing: border-box;
     transition: border-color 0.2s;
 }
@@ -64,4 +64,52 @@
 .login-btn {
     width: 100%;
     margin-top: 10px;
+}
+
+.login-error-text {
+    color: #d9534f;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: left;
+    margin-top: -5px;
+    margin-bottom: 15px;
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 45px;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00195f;
+    opacity: 0.6;
+    transition: 0.2s;
+}
+
+.password-toggle-btn:hover {
+    opacity: 1;
+}
+
+.password-toggle-btn:focus {
+    outline: none;
 }
