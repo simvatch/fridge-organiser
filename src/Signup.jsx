@@ -39,6 +39,8 @@ export default function Signup() {
             if (response.ok) {
                 alert(`Account created successfully for ${firstName}! Redirecting to login...`)
                 navigate("/login")
+            } else {
+                alert(data.detail || "Signup failed");
             }
         } catch (error) {
             console.log(error);
