@@ -9,7 +9,7 @@ export default function App() {
     return localStorage.getItem('isLoggedIn') === 'true'
   })
 
-  const [items, setItems] = useState(['rice', 'pasta', 'milk'])
+  const [items, setItems] = useState([])
   const [standard, setstandard] = useState(['flour', 'sugar', 'salt', 'black pepper', 'olive oil', 'vegetable oil', 'rice', 'pasta', 'eggs', 'milk', 'butter', 'bread', 'garlic', 'onions', 'potatoes', 'canned tomatoes', 'canned beans', 'chicken stock', 'tea', 'coffee', 'oats', 'paprika', 'cumin', 'chili flakes', 'soy sauce', 'honey', 'peanut butter'])
   const [needToBuy, setNeedToBuy] = useState([])
   const [recipes, setRecipes] = useState([])
@@ -18,12 +18,54 @@ export default function App() {
   const [imageLoading, setImageLoading] = useState({})
 
   useEffect(() => {
+    fetchItems()
+  }, [])
+  useEffect(() => {
     checkItems()
   }, [items])
 
+  const fetchItems = async () => {
+    try {
+      const response = await fetch(
+        "https://fridge-organiser.onrender.com/items/1"
+      )
+
+      const data = await response.json()
+
+      const name = data.items.map(item => item.name)
+      setItems(names)
+    } catch (error) {
+      console.error("Fetch items error:", error)
+    }
+  }
+
   const addItems = () => {
     const newItem = prompt('Enter a new item:')
-    if (newItem) { setItems([...items, newItem]) }
+    if (!newItem) return
+    
+    try {
+      const response = await fetch(
+        'https://fridge-organiser.onrender.com/items/add',
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            user_id: 1,
+            name: newItem
+          })
+        }
+      )
+
+      const data = await response.json()
+
+      console.log(data)
+
+      fetchItems()
+    } catch (error) {
+      console.error("Add item error:", error)
+    }
   }
 
   const checkItems = () => {
