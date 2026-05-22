@@ -41,11 +41,26 @@ export default function App() {
         body: JSON.stringify({ ingredients: items })
       })
       const data = await response.json()
-      const parsed = JSON.parse(data.content)
-      setRecipes(parsed.recipes)
+
+      console.log(data.content)
+
+      let cleaned = data.content.trim()
+
+      if (cleaned.startsWith("```json")) {
+        cleaned = cleaned
+          .replace(/```json/g, "")
+          .replace(/```/g, "")
+      }
+
+      const parsed = JSON.parse(cleaned)
+
+      setRecipes(parsed.recipes || [])
+
     } catch (error) {
       console.error('Error parsing AI response:', error)
+      alert("Recipe generation failed")
     }
+  
     setLoading(false)
   }
 
