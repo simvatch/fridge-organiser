@@ -32,14 +32,14 @@ export default function App() {
 
       const data = await response.json()
 
-      const name = data.items.map(item => item.name)
+      const names = data.items.map(item => item.name)
       setItems(names)
     } catch (error) {
       console.error("Fetch items error:", error)
     }
   }
 
-  const addItems = () => {
+  const addItems = async () => {
     const newItem = prompt('Enter a new item:')
     if (!newItem) return
     
