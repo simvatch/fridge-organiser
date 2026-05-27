@@ -12,6 +12,7 @@ class ItemCreate(BaseModel):
 async def add_item(item: ItemCreate, db=Depends(get_db)):
 
     try:
+
         await db.execute(
             """
             INSERT INTO items (user_id, name)
@@ -21,12 +22,30 @@ async def add_item(item: ItemCreate, db=Depends(get_db)):
             item.name.lower()
         )
 
+        existing = await db.fetchrow(
+            """
+            SELECT id FROM item_history
+            WHERE user_id = $1 AND name = $2
+            """,
+            item.user_id,
+            item.name.lower()
+        )
+
+        if not existing:
+            await db.execute(
+                """
+                INSERT INTO item_history (user_id, name)
+                VALUES ($1, $2)
+                """,
+                item.user_id,
+                item.name.lower()
+            )
+
         return {"message": "Item added"}
 
     except Exception as e:
         print("Add item error:", e)
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.get("/{user_id}")
 async def get_items(user_id: int, db=Depends(get_db)):
@@ -73,4 +92,26 @@ async def delete_item(item_id: int, db=Depends(get_db)):
 
     except Exception as e:
         print("Delete item error:", e)
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/history/{user_id}")
+async def get_history(user_id: int, db=Depends(get_db)):
+
+    try:
+        rows = await db.fetch(
+            """
+            SELECT name
+            FROM item_history
+            WHERE user_id = $1
+            ORDER BY name ASC
+            """,
+            user_id
+        )
+
+        history = [row["name"] for row in rows]
+
+        return {"history": history}
+    
+    except Exception as e:
+        print("History error:", e)
         raise HTTPException(status_code=500, detail=str(e))

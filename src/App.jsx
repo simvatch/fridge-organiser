@@ -10,7 +10,7 @@ export default function App() {
   })
 
   const [items, setItems] = useState([])
-  const [standard, setstandard] = useState(['flour', 'sugar', 'salt', 'black pepper', 'olive oil', 'vegetable oil', 'rice', 'pasta', 'eggs', 'milk', 'butter', 'bread', 'garlic', 'onions', 'potatoes', 'canned tomatoes', 'canned beans', 'chicken stock', 'tea', 'coffee', 'oats', 'paprika', 'cumin', 'chili flakes', 'soy sauce', 'honey', 'peanut butter'])
+  const [history, setHistory] = useState([])
   const [needToBuy, setNeedToBuy] = useState([])
   const [recipes, setRecipes] = useState([])
   const [loading, setLoading] = useState(false)
@@ -19,6 +19,7 @@ export default function App() {
 
   useEffect(() => {
     fetchItems()
+    fetchHistory()
   }, [])
   useEffect(() => {
     checkItems()
@@ -36,6 +37,20 @@ export default function App() {
       setItems(names)
     } catch (error) {
       console.error("Fetch items error:", error)
+    }
+  }
+
+  const fetchHistory = async () => {
+    try {
+      const response = await fetch(
+        "https://fridge-organiser.onrender.com/items/history/1"
+      )
+
+      const data = await response.json()
+
+      setHistory(data.history || [])
+    } catch (error) {
+      console.error("History fetch error:", error)
     }
   }
 
@@ -63,6 +78,7 @@ export default function App() {
       console.log(data)
 
       fetchItems()
+      fetchHistory()
     } catch (error) {
       console.error("Add item error:", error)
     }
@@ -70,7 +86,9 @@ export default function App() {
 
   const checkItems = () => {
     const lowerItems = items.map(item => item.toLowerCase())
-    const missing = standard.filter(item => !lowerItems.includes(item.toLowerCase()))
+    const missing = history.filter(
+      item => !lowerItems.includes(item.toLowerCase())
+    )
     setNeedToBuy(missing)
   }
 
