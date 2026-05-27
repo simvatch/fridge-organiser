@@ -33,8 +33,7 @@ export default function App() {
 
       const data = await response.json()
 
-      const names = data.items.map(item => item.name)
-      setItems(names)
+      setItems(data.items)
     } catch (error) {
       console.error("Fetch items error:", error)
     }
@@ -85,13 +84,31 @@ export default function App() {
   }
 
   const checkItems = () => {
-    const lowerItems = items.map(item => item.toLowerCase())
+    const lowerItems = items.map(item => item.name.toLowerCase())
     const missing = history.filter(
       item => !lowerItems.includes(item.toLowerCase())
     )
     setNeedToBuy(missing)
   }
 
+  const deleteItem = async (itemId) => {
+    try {
+      const response = await fetch(
+        `https://fridge-organiser.onrender.com/items/${itemId}`,
+        {
+          method: "DELETE"
+        }
+      )
+
+      const data = await response.json()
+
+      console.log(data)
+
+      fetchItems()
+    } catch (error) {
+      console.error("Delete item error:", error)
+    }
+  }
   const generateRecipes = async () => {
     setLoading(true)
     try {
@@ -180,8 +197,33 @@ export default function App() {
                 <div className='items'> 
                   <div className="list-header">Current Stock:</div>
                   <ul>
-                    {items.map((item, index) => (
-                      <li key={index} className="item-row">{item}</li>
+                    {items.map((item) => (
+                      <li key={item.id} className="item-row">
+
+                        <span>{item.name}</span>
+
+                        <button
+                          onClick={() => deleteItem(item.id)}
+                          className='delete-btn'
+                        > 
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox='0 0 24 24'
+                            fill="none"
+                            stroke="#d9534f"
+                            strokeWidth="2"
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                          >
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
+                        </button>
+                      </li>
                     ))}
                   </ul>
                 </div>
