@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
+import base64
+import json
 import os
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
@@ -158,3 +160,70 @@ def generate_image(data: dict):
     return {
         "image": image
     }
+
+@app.post("/detect-items")
+async def detect_items(file: UploadFile = File(...)):
+
+    image_bytes = await file.read()
+    image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+
+    response = requests.post(
+        "https://ai.hackclub.com/proxy/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "google/gemini-2.5-flash",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": """
+                                Identify all food ingredients visible in this image.
+
+                                Rules:
+                                - Return ONLY JSON
+                                - Use simple ingredient names
+                                - No brand names
+                                - Singular names only
+                                - Ignore non-food objects
+                                - If unsure do not guess
+
+                                Format:
+
+                                {
+                                    "ingredients": [
+                                        "milk",
+                                        "egg",
+                                        "tomato"
+                                    ]
+                                }
+                            """
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{file.content_type};base64,{image_base64}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    )
+
+    result = response.json()
+
+    try:
+        content = result["choices"][0]["message"]["content"]
+        return json.loads(content)
+
+    except Exception as e:
+        print(result)
+        return {
+            "error": str(e),
+            "raw_response": result
+        }
