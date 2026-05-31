@@ -115,7 +115,7 @@ export default function App() {
           {
             method: "POST",
             headers: {
-              "Content-Type": "applications/json"
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({
               user_id: 1,

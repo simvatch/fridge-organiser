@@ -216,6 +216,7 @@ async def detect_items(file: UploadFile = File(...)):
     )
 
     result = response.json()
+    print(result)
 
     try:
         content = result["choices"][0]["message"]["content"]
