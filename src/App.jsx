@@ -16,6 +16,8 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [images, setImages] = useState({})
   const [imageLoading, setImageLoading] = useState({})
+  const [imageFile, setImageFile] = useState(null)
+  const [detectingItems, setDetectingItems] = useState(false)
 
   useEffect(() => {
     fetchItems()
@@ -81,6 +83,55 @@ export default function App() {
     } catch (error) {
       console.error("Add item error:", error)
     }
+  }
+
+  const detectItemsFromImage = async () => {
+    if(!imageFile) {
+      alert("Please select an image first")
+      return
+    }
+
+    setDetectingItems(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", imageFile)
+
+      const response = await fetch(
+        "https://fridge-organiser.onrender.com/detect-items",
+        {
+          method: "POST",
+          body: formData
+        }
+      )
+
+      console.log("Status:", response.status)
+      const data = await response.json()
+      console.log(data)
+
+      for (const ingredient of data.ingredients) {
+        await fetch(
+          "https://fridge-organiser.onrender.com/items/add",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "applications/json"
+            },
+            body: JSON.stringify({
+              user_id: 1,
+              name: ingredient
+            })
+          }
+        )
+      }
+      fetchItems()
+      fetchHistory()
+    }
+    catch (error) {
+      console.log(error)
+      alert("Failed to detect ingredients")
+    }
+    setDetectingItems(false)
   }
 
   const checkItems = () => {
@@ -193,6 +244,22 @@ export default function App() {
                 <div className='title'> Fridge Organiser </div>
 
                 <button onClick={addItems} className='add'> Add Item</button>
+
+                <div className='image-upload'>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files[0])}
+                  />
+
+                  <button
+                    onClick={detectItemsFromImage}
+                    className='add'
+                    disabled={detectingItems}
+                  >
+                    {detectingItems ? "Scanning Image..." : "Add From Photo"}
+                  </button>
+                </div>
 
                 <div className='items'> 
                   <div className="list-header">Current Stock:</div>
