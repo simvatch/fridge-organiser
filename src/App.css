@@ -240,3 +240,111 @@
   color: #00195f;
   cursor: pointer;
 }
+
+.item-row-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.delete-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 8px 15px;
+  background-color: #fff5f5;
+  border-bottom-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-left: 5px solid #d9534f;
+  margin-top: -12px;
+  margin-bottom: 12px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.delete-controls button:not(.confirm-delete) {
+  background-color: #ffffff;
+  border: 1px solid #d9534f;
+  color: #d9534f;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s ease;
+}
+
+.delete-controls button:not(.confirm-delete):hover {
+  background-color: #d9534f;
+  color: white
+}
+
+.delete-controls input[type="number"] {
+  width: 45px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 3px 0;
+  font-family: "Comic Relief", system-ui;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333
+}
+
+.delete-controls input[type="number"]::-webkit-outer-spin-button,
+.delete-controls input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.delete-controls input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.delete-controls .confirm-delete {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: "Comic Relief", system-ui;
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.1s, transform 0.1s;
+}
+
+.delete-controls .confirm-delete:hover {
+  background-color: #b53f3b;
+  transform: scale(1.03);
+}
+
+.delete-controls .confirm-delete:active {
+  transform: scale(0.97);
+}
+
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.item-count {
+  font-size: 0.65em;
+  background: #00195f;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  vertical-align: middle;
+}

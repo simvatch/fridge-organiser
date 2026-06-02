@@ -18,6 +18,8 @@ export default function App() {
   const [imageLoading, setImageLoading] = useState({})
   const [imageFile, setImageFile] = useState(null)
   const [detectingItems, setDetectingItems] = useState(false)
+  const [expandedItem, setExpandedItem] = useState(null)
+  const [deleteAmount, setDeleteAmount] = useState({})
 
   useEffect(() => {
     fetchItems()
@@ -160,6 +162,26 @@ export default function App() {
       console.error("Delete item error:", error)
     }
   }
+
+  const deleteMultipleItems = async (ids, amount) => {
+    try {
+      const idsToDelete = ids.slice(0, amount)
+
+      for (const id of idsToDelete) {
+        await fetch(
+          `https://fridge-organiser.onrender.com/items/${id}`,
+          {
+            method: "DELETE"
+          }
+        )
+      }
+      setExpandedItem(null)
+      fetchItems()
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   const generateRecipes = async () => {
     setLoading(true)
     try {
@@ -219,6 +241,23 @@ export default function App() {
     localStorage.removeItem('isLoggedIn')
   }
 
+  const groupedItems = items.reduce((acc, item) => {
+    const name = item.name.trim().toLowerCase()
+
+    if (!acc[name]) {
+      acc[name] = {
+        count: 0,
+        ids: [],
+        displayName: item.name
+      }
+    }
+
+    acc[name].count++
+    acc[name].ids.push(item.id)
+
+    return acc
+  }, {})
+
   return (
     <BrowserRouter>
       <Routes>
@@ -264,32 +303,109 @@ export default function App() {
                 <div className='items'> 
                   <div className="list-header">Current Stock:</div>
                   <ul>
-                    {items.map((item) => (
-                      <li key={item.id} className="item-row">
+                    {Object.entries(groupedItems).map(([name, data]) => (
+                      <li key={name} className='item-row-wrapper'>
+                        <div key={name} className="item-row">
 
-                        <span>{item.name}</span>
+                          <span>
+                            {data.displayName}
+                            {data.count > 1 && (
+                              <span className="item-count">
+                                x{data.count}
+                              </span>
+                            )}
+                          </span>
 
-                        <button
-                          onClick={() => deleteItem(item.id)}
-                          className='delete-btn'
-                        > 
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox='0 0 24 24'
-                            fill="none"
-                            stroke="#d9534f"
-                            strokeWidth="2"
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                          >
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
-                        </button>
+                          <button
+                            onClick={() => {
+                              if (data.count === 1) {
+                                deleteItem(data.ids[0])
+                              } else {
+                                setExpandedItem(
+                                  expandedItem === name ? null : name
+                                )
+                                setDeleteAmount(prev => ({
+                                  ...prev,
+                                  [name]: 1
+                                }))
+                              }
+                            }}
+                            className='delete-btn'
+                          > 
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox='0 0 24 24'
+                              fill="none"
+                              stroke="#d9534f"
+                              strokeWidth="2"
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                            >
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                              <line x1="10" y1="11" x2="10" y2="17"></line>
+                              <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        {expandedItem === name && (
+                          <div className='delete-controls'>
+
+                            <button
+                              onClick={() =>
+                                setDeleteAmount(prev => ({
+                                  ...prev,
+                                  [name]: Math.max(
+                                    1,
+                                    (prev[name] || 1) - 1
+                                  )
+                                }))
+                              }
+                            >-</button>
+                            
+                            <input 
+                              type="number"
+                              min="1"
+                              max={data.count}
+                              value={deleteAmount[name] || ""}
+                              onChange={(e) => {
+                                const value = e.target.value
+                                setDeleteAmount(prev => ({
+                                  ...prev,
+                                  [name]: value === "" ? "" : Number(value)
+                                }))
+                              }}
+                            />
+
+                            <button
+                              onClick={() => 
+                                setDeleteAmount(prev => ({
+                                  ...prev,
+                                  [name]: Math.min(
+                                    data.count,
+                                    (prev[name] || 1) + 1
+                                  )
+                                }))
+                              }
+                            >+</button>
+
+                            <button
+                              className='confirm-delete'
+                              disabled={
+                                deleteAmount[name] === "" || deleteAmount[name] < 1
+                              }
+                              onClick={() =>
+                                deleteMultipleItems(
+                                  data.ids,
+                                  deleteAmount[name] || 1
+                                )
+                              }
+                            >Delete</button>
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>
