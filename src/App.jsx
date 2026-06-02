@@ -20,6 +20,7 @@ export default function App() {
   const [detectingItems, setDetectingItems] = useState(false)
   const [expandedItem, setExpandedItem] = useState(null)
   const [deleteAmount, setDeleteAmount] = useState({})
+  const [newItemName, setNewItemName] = useState("")
 
   useEffect(() => {
     fetchItems()
@@ -58,9 +59,9 @@ export default function App() {
   }
 
   const addItems = async () => {
-    const newItem = prompt('Enter a new item:')
-    if (!newItem) return
-    
+    const itemToSubmit = newItemName.trim()
+    if(!itemToSubmit) return
+
     try {
       const response = await fetch(
         'https://fridge-organiser.onrender.com/items/add',
@@ -71,7 +72,7 @@ export default function App() {
           },
           body: JSON.stringify({
             user_id: 1,
-            name: newItem
+            name: itemToSubmit
           })
         }
       )
@@ -80,6 +81,7 @@ export default function App() {
 
       console.log(data)
 
+      setNewItemName("")
       fetchItems()
       fetchHistory()
     } catch (error) {
@@ -282,7 +284,22 @@ export default function App() {
 
                 <div className='title'> Fridge Organiser </div>
 
-                <button onClick={addItems} className='add'> Add Item</button>
+                <form
+                  className='add-item-form'
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    addItems();
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder='e.g., Milk Eggs, Apples...'
+                    value={newItemName}
+                    onChange={(e) => setNewItemName(e.target.value)}
+                    className='add-item-input'
+                  />
+                  <button type="submit" className='add'>Add Item</button>
+                </form>
 
                 <div className='image-upload'>
                   <input
