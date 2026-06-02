@@ -190,7 +190,7 @@ export default function App() {
       const response = await fetch('https://fridge-organiser.onrender.com/recipes', {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ingredients: items })
+        body: JSON.stringify({ ingredients: items.map(item => item.name) })
       })
       const data = await response.json()
 
