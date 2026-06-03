@@ -225,14 +225,60 @@
   align-items: center;
   gap: 15px;
   margin-top: 20px;
-  padding: 15px;
+  padding: 20px;
   background: white;
   border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 25, 95, 0.05);
+  box-shadow: 0 10px 25px rgba(0, 25, 95, 0.05);
   width: 100%;
   max-width: 500px;
   box-sizing: border-box;
   font-family: "Comic Relief", system-ui;
+}
+
+.file-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 25px 15px;
+  border: 2px dashed #00195f;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.file-upload-label:hover {
+  background-color: #e0f2fe;
+  border-color: #0033b8;
+}
+
+.file-upload-label:hover .upload-icon {
+  stroke: #0033b8;
+  transform: scale(1.08);
+}
+
+.upload-icon {
+  transition: transform 0.2s ease, stroke 0.2s ease;
+}
+
+.upload-text {
+  font-family: "Comic Relief", system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #00195f;
+  text-align: center;
+  word-break: break-all;
+}
+
+.add:disabled {
+  background-color: #6c7a89;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.6;
 }
 
 .image-upload input[type="file"] {
