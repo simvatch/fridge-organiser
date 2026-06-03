@@ -383,3 +383,98 @@
   color: #a0aec0;
   font-style: italic;
 }
+
+.list-header {
+  font-family: "Comic Relief", system-ui, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color:#00195f;
+  margin-bottom: 15px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  letter-spacing: 0.5px;
+}
+
+.list-header::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 45px;
+  height: 3px;
+  background-color: #0033b8;
+  border-radius: 2px;
+}
+
+.recipe-card h2 {
+  font-family: "Comic Relief", system-ui, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #00195f;
+  margin-top: 0;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.recipe-card .section h3 {
+  font-family: "Comic Relief", system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  margin: 20px 0 10px 0;
+  background-color: rgba(0, 25, 95, 0.04);
+  padding: 6px;
+  border-radius: border-box;
+}
+
+.tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #556b9c;
+  padding: 10px 15px;
+  font-family: "Comic Relief", system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 25px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  outline: none;
+}
+
+.tab:hover:not(.active-tab) {
+  color: #00195f;
+  background-color: rgba(0, 25, 95, 0.05);
+}
+
+.tab.active-tab {
+  background-color: #00195f;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 25, 95, 0.2);
+}
+
+
+@media (max-width: 400px) {
+  .tab {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
+}
+

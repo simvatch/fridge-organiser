@@ -21,6 +21,7 @@ export default function App() {
   const [expandedItem, setExpandedItem] = useState(null)
   const [deleteAmount, setDeleteAmount] = useState({})
   const [newItemName, setNewItemName] = useState("")
+  const [activeTab, setActiveTab] = useState("fridge")
 
   useEffect(() => {
     fetchItems()
@@ -284,206 +285,238 @@ export default function App() {
 
                 <div className='title'> Fridge Organiser </div>
 
-                <form
-                  className='add-item-form'
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    addItems();
-                  }}
-                >
-                  <input
-                    type="text"
-                    placeholder='e.g., Milk Eggs, Apples...'
-                    value={newItemName}
-                    onChange={(e) => setNewItemName(e.target.value)}
-                    className='add-item-input'
-                  />
-                  <button type="submit" className='add'>Add Item</button>
-                </form>
-
-                <div className='image-upload'>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImageFile(e.target.files[0])}
-                  />
-
+                <div className="tabs">
                   <button
-                    onClick={detectItemsFromImage}
-                    className='add'
-                    disabled={detectingItems}
-                  >
-                    {detectingItems ? "Scanning Image..." : "Add From Photo"}
-                  </button>
+                    className={activeTab === "fridge" ? "tab active-tab" : "tab"}
+                    onClick={() => setActiveTab("fridge")}
+                  >Fridge</button>
+
+                  <button 
+                    className={activeTab === "recipes" ? "tab active-tab" : "tab"}
+                    onClick={() => setActiveTab("recipes")}
+                  >Recipes</button>
+
+                  <button 
+                    className={activeTab === "shopping" ? "tab active-tab" : "tab"}
+                    onClick={() => setActiveTab("shopping")}
+                  >Shopping</button>
+                  
                 </div>
 
-                <div className='items'> 
-                  <div className="list-header">Current Stock:</div>
-                  <ul>
-                    {Object.entries(groupedItems).map(([name, data]) => (
-                      <li key={name} className='item-row-wrapper'>
-                        <div key={name} className="item-row">
+                {activeTab === "fridge" && (
+                  <>
+                    <form
+                      className='add-item-form'
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        addItems();
+                      }}
+                    >
+                      <input
+                        type="text"
+                        placeholder='e.g., Milk Eggs, Apples...'
+                        value={newItemName}
+                        onChange={(e) => setNewItemName(e.target.value)}
+                        className='add-item-input'
+                      />
+                      <button type="submit" className='add'>Add Item</button>
+                    </form>
 
-                          <span>
-                            {data.displayName}
-                            {data.count > 1 && (
-                              <span className="item-count">
-                                x{data.count}
-                              </span>
-                            )}
-                          </span>
+                    <div className='image-upload'>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setImageFile(e.target.files[0])}
+                      />
 
-                          <button
-                            onClick={() => {
-                              if (data.count === 1) {
-                                deleteItem(data.ids[0])
-                              } else {
-                                setExpandedItem(
-                                  expandedItem === name ? null : name
-                                )
-                                setDeleteAmount(prev => ({
-                                  ...prev,
-                                  [name]: 1
-                                }))
-                              }
-                            }}
-                            className='delete-btn'
-                          > 
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="18"
-                              height="18"
-                              viewBox='0 0 24 24'
-                              fill="none"
-                              stroke="#d9534f"
-                              strokeWidth="2"
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                            >
-                              <polyline points="3 6 5 6 21 6"></polyline>
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                              <line x1="10" y1="11" x2="10" y2="17"></line>
-                              <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg>
-                          </button>
-                        </div>
-                        
-                        {expandedItem === name && (
-                          <div className='delete-controls'>
-
-                            <button
-                              onClick={() =>
-                                setDeleteAmount(prev => ({
-                                  ...prev,
-                                  [name]: Math.max(
-                                    1,
-                                    (prev[name] || 1) - 1
-                                  )
-                                }))
-                              }
-                            >-</button>
-                            
-                            <input 
-                              type="number"
-                              min="1"
-                              max={data.count}
-                              value={deleteAmount[name] || ""}
-                              onChange={(e) => {
-                                const value = e.target.value
-                                setDeleteAmount(prev => ({
-                                  ...prev,
-                                  [name]: value === "" ? "" : Number(value)
-                                }))
-                              }}
-                            />
-
-                            <button
-                              onClick={() => 
-                                setDeleteAmount(prev => ({
-                                  ...prev,
-                                  [name]: Math.min(
-                                    data.count,
-                                    (prev[name] || 1) + 1
-                                  )
-                                }))
-                              }
-                            >+</button>
-
-                            <button
-                              className='confirm-delete'
-                              disabled={
-                                deleteAmount[name] === "" || deleteAmount[name] < 1
-                              }
-                              onClick={() =>
-                                deleteMultipleItems(
-                                  data.ids,
-                                  deleteAmount[name] || 1
-                                )
-                              }
-                            >Delete</button>
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <button onClick={generateRecipes} className='add' disabled={loading}>
-                  {loading ? 'Generating...' : 'Generate Recipes'}
-                </button>
-
-                <div className='recipes-container'>
-                  {recipes.map((recipe, index) => (
-                    <div className='recipe-card' key={index}>
-                      <h2> {recipe.name}</h2>
-                      <div className='image-container'>
-                        {images[index] ? (
-                          <img src={images[index]} alt={recipe.name} />
-                        ) : imageLoading[index] ? (
-                          <button className='add' disabled>Generating image...</button>
-                        ) : (
-                          <button onClick={() => generateImage(recipe, index)} className='add'>
-                            Generate Preview
-                          </button>
-                        )}
-                      </div>
-                      <p>{recipe.description}</p>
-                      <div className='recipe-meta'>
-                        <span>👪 Serves: {recipe.servings || 'Not specified'}</span>
-                      </div>
-                      <div className='section'>
-                        <h3>🍽️ Steps</h3>
-                        <ol>
-                          {(recipe.steps || []).map((step, stepIndex) => (
-                            <li key={stepIndex}>{step}</li>
-                          ))}
-                        </ol>
-                      </div>
-                      {(recipe.missingIngredients || []).length > 0 && (
-                        <div className='section'>
-                          <h3>🛒 Missing Ingredients</h3>
-                          <ul>
-                            {recipe.missingIngredients.map((ingredient, index) => (
-                              <li key={index}>{ingredient.charAt(0).toUpperCase() + ingredient.slice(1)}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      <div className="cook-time">
-                        <span>⏲️ Cook Time: {recipe.cookTime || 'Not specified'}</span>
-                      </div>
+                      <button
+                        onClick={detectItemsFromImage}
+                        className='add'
+                        disabled={detectingItems}
+                      >
+                        {detectingItems ? "Scanning Image..." : "Add From Photo"}
+                      </button>
                     </div>
-                  ))}
-                </div>
 
-                <div className='items'>
-                  <div className="list-header">Need to Buy:</div>
-                  <ul>
-                    {needToBuy.map((item, index) => (
-                      <li key={index} className="item-row">{item}</li>
-                    ))}
-                  </ul>
-                </div>
+                    <div className='items'> 
+                      <div className="list-header">Current Stock:</div>
+                      <ul>
+                        {Object.entries(groupedItems).map(([name, data]) => (
+                          <li key={name} className='item-row-wrapper'>
+                            <div key={name} className="item-row">
+
+                              <span>
+                                {data.displayName}
+                                {data.count > 1 && (
+                                  <span className="item-count">
+                                    x{data.count}
+                                  </span>
+                                )}
+                              </span>
+
+                              <button
+                                onClick={() => {
+                                  if (data.count === 1) {
+                                    deleteItem(data.ids[0])
+                                  } else {
+                                    setExpandedItem(
+                                      expandedItem === name ? null : name
+                                    )
+                                    setDeleteAmount(prev => ({
+                                      ...prev,
+                                      [name]: 1
+                                    }))
+                                  }
+                                }}
+                                className='delete-btn'
+                              > 
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="18"
+                                  height="18"
+                                  viewBox='0 0 24 24'
+                                  fill="none"
+                                  stroke="#d9534f"
+                                  strokeWidth="2"
+                                  strokeLinecap='round'
+                                  strokeLinejoin='round'
+                                >
+                                  <polyline points="3 6 5 6 21 6"></polyline>
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                              </button>
+                            </div>
+                            
+                            {expandedItem === name && (
+                              <div className='delete-controls'>
+
+                                <button
+                                  onClick={() =>
+                                    setDeleteAmount(prev => ({
+                                      ...prev,
+                                      [name]: Math.max(
+                                        1,
+                                        (prev[name] || 1) - 1
+                                      )
+                                    }))
+                                  }
+                                >-</button>
+                                
+                                <input 
+                                  type="number"
+                                  min="1"
+                                  max={data.count}
+                                  value={deleteAmount[name] || ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value
+                                    setDeleteAmount(prev => ({
+                                      ...prev,
+                                      [name]: value === "" ? "" : Number(value)
+                                    }))
+                                  }}
+                                />
+
+                                <button
+                                  onClick={() => 
+                                    setDeleteAmount(prev => ({
+                                      ...prev,
+                                      [name]: Math.min(
+                                        data.count,
+                                        (prev[name] || 1) + 1
+                                      )
+                                    }))
+                                  }
+                                >+</button>
+
+                                <button
+                                  className='confirm-delete'
+                                  disabled={
+                                    deleteAmount[name] === "" || deleteAmount[name] < 1
+                                  }
+                                  onClick={() =>
+                                    deleteMultipleItems(
+                                      data.ids,
+                                      deleteAmount[name] || 1
+                                    )
+                                  }
+                                >Delete</button>
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                )}
+
+                {activeTab === "recipes" && (
+                  <>
+
+                    <button onClick={generateRecipes} className='add' disabled={loading}>
+                      {loading ? 'Generating...' : 'Generate Recipes'}
+                    </button>
+
+                    <div className='recipes-container'>
+                      {recipes.map((recipe, index) => (
+                        <div className='recipe-card' key={index}>
+                          <h2> {recipe.name}</h2>
+                          <div className='image-container'>
+                            {images[index] ? (
+                              <img src={images[index]} alt={recipe.name} />
+                            ) : imageLoading[index] ? (
+                              <button className='add' disabled>Generating image...</button>
+                            ) : (
+                              <button onClick={() => generateImage(recipe, index)} className='add'>
+                                Generate Preview
+                              </button>
+                            )}
+                          </div>
+                          <p>{recipe.description}</p>
+                          <div className='recipe-meta'>
+                            <span>👪 Serves: {recipe.servings || 'Not specified'}</span>
+                          </div>
+                          <div className='section'>
+                            <h3>🍽️ Steps</h3>
+                            <ol>
+                              {(recipe.steps || []).map((step, stepIndex) => (
+                                <li key={stepIndex}>{step}</li>
+                              ))}
+                            </ol>
+                          </div>
+                          {(recipe.missingIngredients || []).length > 0 && (
+                            <div className='section'>
+                              <h3>🛒 Missing Ingredients</h3>
+                              <ul>
+                                {recipe.missingIngredients.map((ingredient, index) => (
+                                  <li key={index}>{ingredient.charAt(0).toUpperCase() + ingredient.slice(1)}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          <div className="cook-time">
+                            <span>⏲️ Cook Time: {recipe.cookTime || 'Not specified'}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {activeTab === "shopping" && (
+                  <>
+
+                    <div className='items'>
+                      <div className="list-header">Need to Buy:</div>
+                      <ul>
+                        {needToBuy.map((item, index) => (
+                          <li key={index} className="item-row">{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               <Navigate to="/login" />
