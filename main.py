@@ -224,7 +224,7 @@ async def detect_items(file: UploadFile = File(...)):
             }
         ],
         "temperature": 0.1,
-        "max_tokens": 300
+        "max_tokens": 2000
     })
 
     try:
