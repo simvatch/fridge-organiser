@@ -202,15 +202,7 @@ async def detect_items(file: UploadFile = File(...)):
                             }
                             List visible food ingredients only.
                             No brands
-                            Return one array entry per physical ingredient visible.
-                            Examples:
-                            - 3 apples → ["apple", "apple", "apple"]
-                            - 2 eggs → ["egg", "egg"]
-                            - 5 tomatoes → ["tomato", "tomato", "tomato", "tomato", "tomato"]
-
-                            Do not combine duplicates into a single entry.
-                            Do not return quantities.
-                            Use singular names only.
+                            No duplicates
                             No guessing
                         """
                     },
