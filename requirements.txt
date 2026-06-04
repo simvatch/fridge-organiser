@@ -1,7 +1,9 @@
 fastapi
 uvicorn
 python-dotenv
-requests
+httpx
+pillow
+orjson
 passlib[bcrypt]
 asyncpg
 email-validator
