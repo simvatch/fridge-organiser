@@ -22,6 +22,8 @@ export default function App() {
   const [deleteAmount, setDeleteAmount] = useState({})
   const [newItemName, setNewItemName] = useState("")
   const [activeTab, setActiveTab] = useState("fridge")
+  const [detectedItems, setDetectedItems] = useState([])
+  const [showDetectedModal, setShowDetectedModal] = useState(false)
 
   useEffect(() => {
     fetchItems()
@@ -114,21 +116,21 @@ export default function App() {
       const data = await response.json()
       console.log(data)
 
-      for (const ingredient of data.ingredients) {
-        await fetch(
-          "https://fridge-organiser.onrender.com/items/add",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              user_id: 1,
-              name: ingredient
-            })
-          }
-        )
+      if (!Array.isArray(data.ingredients)) {
+        alert("Failed to detect ingredients")
+        return
       }
+
+      const uniqueIngredients = [...new Set(data.ingredients)]
+
+      setDetectedItems(
+        uniqueIngredients.map(item => ({
+          name: item,
+          quantity: 1
+        }))
+      )
+      setShowDetectedModal(true)
+
       fetchItems()
       fetchHistory()
     }
@@ -137,6 +139,37 @@ export default function App() {
       alert("Failed to detect ingredients")
     }
     setDetectingItems(false)
+  }
+
+  const addDetectedItems = async () => {
+    try {
+      for (const item of detectedItems) {
+        for (let i = 0; i < item.quantity; i++){
+            await fetch(
+              "https://fridge-organiser.onrender.com/items/add",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  user_id: 1,
+                  name: item.name
+                })
+              }
+            )
+        }
+      }
+
+      setShowDetectedModal(false)
+      setDetectedItems([])
+
+      fetchItems()
+      fetchHistory()
+    } catch (error) {
+      console.error(error)
+      alert("Failed to add items")
+    }
   }
 
   const checkItems = () => {
@@ -540,6 +573,49 @@ export default function App() {
                       </ul>
                     </div>
                   </>
+                )}
+
+                {showDetectedModal && (
+                  <div className="modal-overlay">
+                    <div className="modal-window">
+                      <h2 className='modal-header'>Review or adjust quantities before adding them to your fridge.</h2>
+                      <div className='modal-content'>
+                        {detectedItems.map((item, index) => (
+                          <div key={index} className="detected-card">
+                            <span className='detected-item-name'>{item.name}</span>
+                            <div className="quantity-controls">
+                              {/* FIX #2: Safe, deep immutable update mapping */}
+                              <button
+                                type='button'
+                                className='qty-btn'
+                                onClick={() => {
+                                  const updated = detectedItems.map((curr, idx) => 
+                                    idx === index ? { ...curr, quantity: curr.quantity - 1 } : curr
+                                  ).filter(i => i.quantity > 0)
+                                  setDetectedItems(updated)
+                                }}
+                              >-</button>
+                              <span className='qty-number'>{item.quantity}</span>
+                              <button
+                                type="button"
+                                className='qty-btn'
+                                onClick={() => {
+                                  const updated = detectedItems.map((curr, idx) => 
+                                    idx === index ? { ...curr, quantity: curr.quantity + 1 } : curr
+                                  )
+                                  setDetectedItems(updated)
+                                }}
+                              >+</button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="modal-footer">
+                        <button onClick={() => setShowDetectedModal(false)} className='btn-secondary'>Cancel</button>
+                        <button className="btn-primary" onClick={addDetectedItems} disabled={detectedItems.length === 0}>Add To Fridge</button>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             ) : (
