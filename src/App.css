@@ -22,13 +22,17 @@
 .title {
   font-size: 4em;
   display: flex;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 3cqh;
   justify-content: center;
-  color: #00195f;
   font-family: "Comic Relief", system-ui;
-  text-shadow: 3px 3px 5px rgba(255, 255, 255, 0.5);
+  letter-spacing: -1px;
+  background: linear-gradient(150deg, #00195f 50%, #0052cc 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(2px 4px 10px rgba(0, 25, 95, 0.15));
 }
+
 .add {
   background-color: #00195f;
   color: white;
@@ -123,26 +127,33 @@
 }
 
 .recipes-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
   width: 100%;
-  max-width: 1000px;
-  margin: 30px 0;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 15px;
+  box-sizing: border-box;
 }
 
 .recipe-card {
   background: white;
+  border-radius: 12x;
+  padding: 20px;
   border-radius: 20px;
-  padding: 25px;
-  width: 100%;
-  max-width: 450px;
-  box-shadow: 0 10px 30px rgba(0, 25, 95, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   font-family: "Comic Relief", system-ui;
   border-top: 8px solid #00195f;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recipe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
 .recipe-card h2 {
@@ -214,9 +225,52 @@
 
 .image-container img {
   max-width: 100%;
-  height: auto;
-  border-radius: 12px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 900px) {
+  .recipes-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 15px;
+    box-sizing: border-box;
+  }
+
+  .recipe-card {
+    width: calc((100% - 50px) / 3);
+    min-width: 280px;
+    box-sizing: border-box;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 899px) {
+  .recipes-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+  }
+}
+
+@media (max-width: 600px) {
+  .recipes-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+  }
+
+  .recipe-card {
+    width: 100%;
+  }
 }
 
 .image-upload {
