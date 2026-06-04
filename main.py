@@ -1,10 +1,14 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import ORJSONResponse
 from pydantic import BaseModel
-import requests
 import base64
 import json
 import os
+import httpx
+from io import BytesIO
+from PIL import Image
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from backend.auth import router as auth_router
@@ -13,6 +17,8 @@ from backend.items import router as item_router
 
 load_dotenv()
 
+API_KEY = os.getenv("hackclubAPI")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Connecting to database")
@@ -20,8 +26,12 @@ async def lifespan(app: FastAPI):
     yield
     print("Disconnecting from database")
     await disconnect_db()
+    await client.aclose()
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    default_response_class=ORJSONResponse
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,13 +41,42 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(
+    GZipMiddleware,
+    minimum_size=1000
+)
+
 app.include_router(auth_router)
 app.include_router(item_router)
 
-API_KEY = os.getenv("hackclubAPI")
+client = httpx.AsyncClient(
+    http2=True,
+    timeout=httpx.Timeout(
+        connect=5.0,
+        read=30.0,
+        write=30.0,
+        pool=5.0
+    ),
+    limits=httpx.Limits(
+        max_connections=100,
+        max_keepalive_connections=50
+    )
+)
 
 class FridgeRequest(BaseModel):
     ingredients: list[str]
+
+async def call_gemini(payload: dict):
+    response = await client.post(
+        "https://ai.hackclub.com/proxy/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json=payload
+    )
+    response.raise_for_status()
+    return response.json()
 
 @app.get("/")
 @app.head("/")
@@ -45,39 +84,24 @@ def home():
     return {"status": "online"}
 
 @app.post("/recipes")
-def get_recipes(request: FridgeRequest):
+async def get_recipes(request: FridgeRequest):
 
     ingredients = ",".join(request.ingredients)
     prompt = f"""
-    The user has these ingredients:
+    Ingredients:
 
     {ingredients}
 
-    Generate exactly 5 recipes:
-    - 3 recipes must use ONLY the provided ingredients
-    - 2 recipes may include a few extra ingredients (must be listed in missingIngredients)
-
-    Return ONLY valid JSON.
+    Generate exactly 5 recipes.
 
     Rules:
-    - Each recipe must have 5 to 8 steps (no fewer, no more)
-    - Steps must be simple, single actions only
-    - Each step must contain ONE action only (no combining actions)
-    - Steps must be clear, beginner-friendly, and practical
-    - No paragraphs allowed in steps
-    - Do NOT use vague phrases like "cook until done" or "season to taste"
-    - Always include quantities (grams, cups, units) when adding ingredients
-    - Always include cooking times in minutes when relevant
-    - Do NOT invent ingredients inside steps
-    - Any ingredient not in the fridge list MUST go in missingIngredients only
-    - Keep recipes realistic and consistent with available ingredients
-    - Each recipe must include a "servings" field
-    - "servings" must be an integer representing number of people served
-    - base all ingredient quantities on that number
-    - Each recipe must include an "imagePrompt" field.
-    - The imagePrompt must describe the final cooked dish in a visually appealing way for image generation.
-    - It must be 2 sentences that are descriptive and food-focused.
-    - Do not include steps or ingredients in the imagePrompt.
+    - First 3 use only provided ingredients
+    - Last 2 may require extras
+    - 5-8 steps
+    - Beginner friendly
+    - servings must be integer
+    - include imagePrompt
+    - return ONLY JSON
 
     Format:
 
@@ -100,122 +124,108 @@ def get_recipes(request: FridgeRequest):
     }}
     """
 
-    response = requests.post(
-        "https://ai.hackclub.com/proxy/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "qwen/qwen3-32b",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        }
-    )
+    result = await call_gemini({
+        "model": "google/gemini-2.5-flash",
+        "messages": [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        "temperature": 0.7,
+        "max_tokens": 2000
+    })
 
-    data = response.json()
-    content = data["choices"][0]["message"]["content"]
-
-    return {"content": content}
+    return {"content": result["choices"][0]["message"]["content"]}
 
 @app.post("/image")
-def generate_image(data: dict):
+async def generate_image(data: dict):
 
     prompt = data["prompt"]
 
-    response = requests.post(
-        "https://ai.hackclub.com/proxy/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "google/gemini-3-pro-image-preview",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "modalities": ["image", "text"],
-            "image_config": {
-                "aspect_ratio": "1:1",
+    result = await call_gemini({
+        "model": "google/gemini-3-pro-image-preview",
+        "messages": [
+            {
+                "role": "user",
+                "content": data["prompt"]
             }
+        ],
+        "modalities": ["image", "text"],
+        "image_config": {
+            "aspect_ratio": "1:1",
         }
-    )
+    })
 
-    result = response.json()
-
-    image = None
-
+    image_url = None
     try:
-        image = result["choices"][0]["message"]["images"][0]["image_url"]["url"]
+        image_url = result["choices"][0]["message"]["images"][0]["image_url"]["url"]
     except Exception as e:
         print("Image error:", e)
     
-    return {
-        "image": image
-    }
+    return {"image": image_url}
 
 @app.post("/detect-items")
 async def detect_items(file: UploadFile = File(...)):
 
     image_bytes = await file.read()
-    image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+    img = Image.open(BytesIO(image_bytes))
 
-    response = requests.post(
-        "https://ai.hackclub.com/proxy/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "google/gemini-2.5-flash",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": """
-                                Identify all food ingredients visible in this image.
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+    
+    img.thumbnail((1200, 1200))
 
-                                Rules:
-                                - Return ONLY JSON
-                                - Use simple ingredient names
-                                - No brand names
-                                - Singular names only
-                                - Ignore non-food objects
-                                - If unsure do not guess
+    compressed = BytesIO()
 
-                                Format:
-
-                                {
-                                    "ingredients": [
-                                        "milk",
-                                        "egg",
-                                        "tomato"
-                                    ]
-                                }
-                            """
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:{file.content_type};base64,{image_base64}"
-                            }
-                        }
-                    ]
-                }
-            ]
-        }
+    img.save(
+        compressed,
+        format="JPEG",
+        quality=75,
+        optimize=True
     )
 
-    result = response.json()
+    image_base64 = base64.b64encode(compressed.getvalue()).decode("utf-8")
+
+    result = await call_gemini({
+        "model": "google/gemini-2.5-flash",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+                            Return ONLY JSON
+                            {
+                            "ingredients": []
+                            }
+                            List visible food ingredients only.
+                            No brands
+                            Return one array entry per physical ingredient visible.
+                            Examples:
+                            - 3 apples → ["apple", "apple", "apple"]
+                            - 2 eggs → ["egg", "egg"]
+                            - 5 tomatoes → ["tomato", "tomato", "tomato", "tomato", "tomato"]
+
+                            Do not combine duplicates into a single entry.
+                            Do not return quantities.
+                            Use singular names only.
+                            No guessing
+                        """
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{image_base64}"
+                        }
+                    }
+                ]
+            }
+        ],
+        "temperature": 0.1,
+        "max_tokens": 300
+    })
 
     try:
         content = result["choices"][0]["message"]["content"]
