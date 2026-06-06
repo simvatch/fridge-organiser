@@ -8,3 +8,4 @@ passlib[bcrypt]
 asyncpg
 email-validator
 python-multipart
+python-jose[cryptography]
