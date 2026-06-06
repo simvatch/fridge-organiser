@@ -143,9 +143,14 @@ export default function App() {
 
   const addDetectedItems = async () => {
     try {
-      for (const item of detectedItems) {
-        for (let i = 0; i < item.quantity; i++){
-            await fetch(
+      const promises = []
+      const itemsToAdd = detectedItems.filter(item => Number(item.quantity) > 0)
+
+      for (const item of itemsToAdd) {
+        const qty = Number(item.quantity)
+        for (let i = 0; i < qty; i++){
+          promises.push(
+            fetch(
               "https://fridge-organiser.onrender.com/items/add",
               {
                 method: "POST",
@@ -158,9 +163,11 @@ export default function App() {
                 })
               }
             )
+          )
         }
       }
 
+      await Promise.all(promises)
       setShowDetectedModal(false)
       setDetectedItems([])
 
@@ -581,21 +588,50 @@ export default function App() {
                       <h2 className='modal-header'>Review or adjust quantities before adding them to your fridge.</h2>
                       <div className='modal-content'>
                         {detectedItems.map((item, index) => (
-                          <div key={index} className="detected-card">
+                          <div 
+                            key={index} 
+                            className="detected-card"
+                            style={{
+                                opacity: item.quantity === 0 ? 0.4 : 1,
+                                transition: "opacity 0.2s ease",
+                                backgroundColor: item.quantity === 0 ? "#f5f5f5" : ""
+                              }}
+                          >
                             <span className='detected-item-name'>{item.name}</span>
+
                             <div className="quantity-controls">
-                              {/* FIX #2: Safe, deep immutable update mapping */}
                               <button
                                 type='button'
                                 className='qty-btn'
                                 onClick={() => {
                                   const updated = detectedItems.map((curr, idx) => 
-                                    idx === index ? { ...curr, quantity: curr.quantity - 1 } : curr
-                                  ).filter(i => i.quantity > 0)
-                                  setDetectedItems(updated)
+                                    idx === index ? { ...curr, quantity: Math.max(0, curr.quantity - 1) } : curr
+                                  );
+                                  setDetectedItems(updated);
                                 }}
                               >-</button>
-                              <span className='qty-number'>{item.quantity}</span>
+
+                              <input
+                                type="number"
+                                className='qty-input'
+                                min="0"
+                                value={item.quantity ?? ""}
+                                style={{
+                                  width: "40px",
+                                  textAlign: "center",
+                                  border: "1px solid #ccc",
+                                  borderRadius: "4px",
+                                  margin: "0 5px",
+                                }}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  const updated = detectedItems.map((curr, idx) =>
+                                    idx === index ? { ...curr, quantity: value === "" ? "": Number(value) } : curr
+                                  );
+                                  setDetectedItems(updated)
+                                }}
+                              />
+
                               <button
                                 type="button"
                                 className='qty-btn'
@@ -612,7 +648,7 @@ export default function App() {
                       </div>
                       <div className="modal-footer">
                         <button onClick={() => setShowDetectedModal(false)} className='btn-secondary'>Cancel</button>
-                        <button className="btn-primary" onClick={addDetectedItems} disabled={detectedItems.length === 0}>Add To Fridge</button>
+                        <button className="btn-primary" onClick={addDetectedItems} disabled={!detectedItems.some(item => item.quantity > 0)}>Add To Fridge</button>
                       </div>
                     </div>
                   </div>
