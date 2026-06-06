@@ -26,6 +26,7 @@ export default function Signup() {
                 "https://fridge-organiser.onrender.com/auth/signup",
                 {
                     method: "POST",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
                     },
