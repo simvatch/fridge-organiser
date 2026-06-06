@@ -5,9 +5,7 @@ import Signup from './Signup'
 import './App.css'
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('isLoggedIn') === 'true'
-  })
+  const [isAuthenticated, setIsAuthenticated] = useState(null)
 
   const [items, setItems] = useState([])
   const [history, setHistory] = useState([])
@@ -26,17 +24,40 @@ export default function App() {
   const [showDetectedModal, setShowDetectedModal] = useState(false)
 
   useEffect(() => {
-    fetchItems()
-    fetchHistory()
+    checkAuth()
   }, [])
   useEffect(() => {
     checkItems()
   }, [items])
 
+  const checkAuth = async () => {
+    try {
+      const response = await fetch(
+        "https://fridge-organiser.onrender.com/auth/me",
+        {
+          credentials: "include"
+        }
+      )
+
+      if (response.ok) {
+        setIsAuthenticated(true)
+        fetchItems()
+        fetchHistory()
+      } else {
+        setIsAuthenticated(false)
+      }
+    } catch {
+      setIsAuthenticated(false)
+    }
+  }
+
   const fetchItems = async () => {
     try {
       const response = await fetch(
-        "https://fridge-organiser.onrender.com/items/1"
+        "https://fridge-organiser.onrender.com/items",
+        {
+          credentials: "include"
+        }
       )
 
       const data = await response.json()
@@ -50,7 +71,10 @@ export default function App() {
   const fetchHistory = async () => {
     try {
       const response = await fetch(
-        "https://fridge-organiser.onrender.com/items/history/1"
+        "https://fridge-organiser.onrender.com/items/history",
+        {
+          credentials: "include"
+        }
       )
 
       const data = await response.json()
@@ -70,11 +94,11 @@ export default function App() {
         'https://fridge-organiser.onrender.com/items/add',
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            user_id: 1,
             name: itemToSubmit
           })
         }
@@ -108,6 +132,7 @@ export default function App() {
         "https://fridge-organiser.onrender.com/detect-items",
         {
           method: "POST",
+          credentials: "include",
           body: formData
         }
       )
@@ -154,11 +179,11 @@ export default function App() {
               "https://fridge-organiser.onrender.com/items/add",
               {
                 method: "POST",
+                credentials: "include",
                 headers: {
                   "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                  user_id: 1,
                   name: item.name
                 })
               }
@@ -192,7 +217,8 @@ export default function App() {
       const response = await fetch(
         `https://fridge-organiser.onrender.com/items/${itemId}`,
         {
-          method: "DELETE"
+          method: "DELETE",
+          credentials: "include",
         }
       )
 
@@ -214,7 +240,8 @@ export default function App() {
         await fetch(
           `https://fridge-organiser.onrender.com/items/${id}`,
           {
-            method: "DELETE"
+            method: "DELETE",
+            credentials: "include"
           }
         )
       }
@@ -230,6 +257,7 @@ export default function App() {
     try {
       const response = await fetch('https://fridge-organiser.onrender.com/recipes', {
         method: 'POST',
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ingredients: items.map(item => item.name) })
       })
@@ -262,6 +290,7 @@ export default function App() {
     try {
       const res = await fetch('https://fridge-organiser.onrender.com/image', {
         method: 'POST',
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({prompt: recipe.imagePrompt})
       })
@@ -276,12 +305,19 @@ export default function App() {
 
   const loginUser = () => {
     setIsAuthenticated(true)
-    localStorage.setItem('isLoggedIn', 'true')
+    fetchItems()
+    fetchHistory()
   }
 
-  const logoutUser = () => {
+  const logoutUser = async () => {
+    await fetch(
+      "https://fridge-organiser.onrender.com/auth/logout",
+      {
+        method: "POST",
+        credentials: "include"
+      }
+    )
     setIsAuthenticated(false)
-    localStorage.removeItem('isLoggedIn')
   }
 
   const groupedItems = items.reduce((acc, item) => {
@@ -300,6 +336,10 @@ export default function App() {
 
     return acc
   }, {})
+
+  if (isAuthenticated === null) {
+    return <div>Loading...</div>
+  }
 
   return (
     <BrowserRouter>
