@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from backend.database import get_db
+from backend.auth import get_current_user
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -9,7 +10,7 @@ class ItemCreate(BaseModel):
     name: str
 
 @router.post("/add")
-async def add_item(item: ItemCreate, db=Depends(get_db)):
+async def add_item(item: ItemCreate, user_id: int = Depends(get_current_user), db=Depends(get_db)):
 
     try:
 
@@ -18,7 +19,7 @@ async def add_item(item: ItemCreate, db=Depends(get_db)):
             INSERT INTO items (user_id, name)
             VALUES ($1, $2)
             """,
-            item.user_id,
+            user_id,
             item.name.lower()
         )
 
@@ -27,7 +28,7 @@ async def add_item(item: ItemCreate, db=Depends(get_db)):
             SELECT id FROM item_history
             WHERE user_id = $1 AND name = $2
             """,
-            item.user_id,
+            user_id,
             item.name.lower()
         )
 
@@ -37,7 +38,7 @@ async def add_item(item: ItemCreate, db=Depends(get_db)):
                 INSERT INTO item_history (user_id, name)
                 VALUES ($1, $2)
                 """,
-                item.user_id,
+                user_id,
                 item.name.lower()
             )
 
@@ -47,8 +48,8 @@ async def add_item(item: ItemCreate, db=Depends(get_db)):
         print("Add item error:", e)
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{user_id}")
-async def get_items(user_id: int, db=Depends(get_db)):
+@router.get("/")
+async def get_items(user_id: int = Depends(get_current_user), db=Depends(get_db)):
 
     try:
         rows = await db.fetch(
@@ -61,13 +62,13 @@ async def get_items(user_id: int, db=Depends(get_db)):
             user_id
         )
 
-        items = []
-
-        for row in rows:
-            items.append({
+        items = [
+            {
                 "id": row["id"],
                 "name": row["name"]
-            })
+            }
+            for row in rows
+        ]
 
         return {"items": items}
 
@@ -77,7 +78,7 @@ async def get_items(user_id: int, db=Depends(get_db)):
 
 
 @router.delete("/{item_id}")
-async def delete_item(item_id: int, db=Depends(get_db)):
+async def delete_item(item_id: int, user_id: int = Depends(get_current_user), db=Depends(get_db)):
 
     try:
         result = await db.execute(
@@ -85,7 +86,8 @@ async def delete_item(item_id: int, db=Depends(get_db)):
             DELETE FROM items
             WHERE id = $1
             """,
-            item_id
+            item_id,
+            user_id
         )
 
         return {"message": "Item deleted"}
@@ -94,8 +96,8 @@ async def delete_item(item_id: int, db=Depends(get_db)):
         print("Delete item error:", e)
         raise HTTPException(status_code=500, detail=str(e))
     
-@router.get("/history/{user_id}")
-async def get_history(user_id: int, db=Depends(get_db)):
+@router.get("/history")
+async def get_history(user_id: int = Depends(get_current_user), db=Depends(get_db)):
 
     try:
         rows = await db.fetch(
