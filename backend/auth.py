@@ -117,8 +117,8 @@ async def login(user: Login, response: Response, db=Depends(get_db)):
         key="access_token",
         value=token,
         httponly=True,
-        secure=False,  # Come back and change to True later when not on localhost
-        samesite="lax",
+        secure=True, 
+        samesite="none",
         max_age=60 * 60 * 24 * 30
     )
      

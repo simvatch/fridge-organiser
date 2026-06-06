@@ -54,7 +54,7 @@ export default function App() {
   const fetchItems = async () => {
     try {
       const response = await fetch(
-        "https://fridge-organiser.onrender.com/items",
+        "https://fridge-organiser.onrender.com/items/",
         {
           credentials: "include"
         }
