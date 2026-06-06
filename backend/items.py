@@ -6,7 +6,6 @@ from backend.auth import get_current_user
 router = APIRouter(prefix="/items", tags=["items"])
 
 class ItemCreate(BaseModel):
-    user_id: int
     name: str
 
 @router.post("/add")
