@@ -35,7 +35,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173/login", "https://fridge-organiser-six.vercel.app/"],
+    allow_origins=["http://localhost:5173", "https://fridge-organiser-six.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
