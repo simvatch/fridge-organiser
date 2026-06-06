@@ -2,6 +2,9 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import ORJSONResponse
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+import uvicorn
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from pydantic import BaseModel
 import base64
 import json
@@ -32,6 +35,8 @@ app = FastAPI(
     lifespan=lifespan,
     default_response_class=ORJSONResponse
 )
+
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 app.add_middleware(
     CORSMiddleware,

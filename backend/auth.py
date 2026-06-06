@@ -134,5 +134,10 @@ async def me(user_id: int = Depends(get_current_user)):
 @router.post("/logout")
 async def logout(response: Response):
 
-    response.delete_cookie("access_token")
+    response.delete_cookie(
+        "access_token", 
+        httponly=True,
+        secure=True,
+        samesite="none"
+        )
     return { "message": "Logged out" }
