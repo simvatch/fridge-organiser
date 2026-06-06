@@ -16,6 +16,7 @@ export default function Login({ onLogin }) {
         try {
             const response = await fetch("https://fridge-organiser.onrender.com/auth/login", {
                 method: "POST",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },
