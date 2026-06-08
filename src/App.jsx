@@ -32,10 +32,10 @@ export default function App() {
   }, [items])
 
   useEffect (() => {
-    if (isAuthenticated && items.length > 0 && !recipesLoading) {
+    if (isAuthenticated && items.length > 0 && !recipesLoading && recipes.length === 0) {
       generateRecipes()
     }
-  }, [items])
+  }, [items, isAuthenticated])
 
   const checkAuth = async () => {
     try {
@@ -282,7 +282,9 @@ export default function App() {
 
       const parsed = JSON.parse(cleaned)
 
-      setRecipes(parsed.recipes || [])
+      const recipeList = parsed.recipes || []
+      setRecipes(recipeList)
+      preloadImages(recipeList)
 
     } catch (error) {
       console.error('Error parsing AI response:', error)
@@ -308,6 +310,47 @@ export default function App() {
       console.error(err)
     }
     setImageLoading(prev => ({ ...prev, [index]: false }))
+  }
+
+  const preloadImages = async (recipeList) => {
+
+    const batchSize = 2
+
+    for (let start = 0; start < recipeList.length; start += batchSize) {
+      const batch = recipeList.slice(start, start + batchSize)
+      await Promise.all(
+        recipeList.map(async (recipe, i) => {
+          try {
+            const res = await fetch(
+              "https://fridge-organiser.onrender.com/image",
+              {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  prompt: recipe.imagePrompt
+                })
+              }
+            )
+
+            const data = await res.json()
+
+            const imageUrl = data?.image || null
+
+            if (imageUrl) {
+              setImages(prev => ({
+                ...prev,
+                [i]: imageUrl
+              }))
+            }
+          } catch (err) {
+            console.error(err)
+          }
+        })
+      )
+    }
   }
 
   const loginUser = () => {
@@ -588,17 +631,10 @@ export default function App() {
                             <div className="image-container">
                               {images[index] ? (
                                 <img src={images[index]} alt={recipe.name} />
-                              ) : imageLoading[index] ? (
-                                <button className="add" disabled>
-                                  Generating image...
-                                </button>
                               ) : (
-                                <button
-                                  onClick={() => generateImage(recipe, index)}
-                                  className="add"
-                                >
-                                  Generate Preview
-                                </button>
+                                <div className='image-placeholder'>
+                                  <span>Generating preview...</span>
+                                </div>
                               )}
                             </div>
 

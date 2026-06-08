@@ -71,17 +71,23 @@ client = httpx.AsyncClient(
 class FridgeRequest(BaseModel):
     ingredients: list[str]
 
-async def call_gemini(payload: dict):
-    response = await client.post(
-        "https://ai.hackclub.com/proxy/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json=payload
-    )
-    response.raise_for_status()
-    return response.json()
+async def call_gemini(payload: dict, retries: int = 2):
+    for attempt in range(retries + 1):
+        try:
+            response = await client.post(
+                "https://ai.hackclub.com/proxy/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json=payload
+            )
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code in (502, 503, 502) and attempt < retries:
+                continue
+            raise
 
 @app.get("/")
 @app.head("/")
@@ -148,19 +154,23 @@ async def generate_image(data: dict):
 
     prompt = data["prompt"]
 
-    result = await call_gemini({
-        "model": "google/gemini-3-pro-image-preview",
-        "messages": [
-            {
-                "role": "user",
-                "content": data["prompt"]
+    try:
+        result = await call_gemini({
+            "model": "google/gemini-3-pro-image-preview",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": data["prompt"]
+                }
+            ],
+            "modalities": ["image", "text"],
+            "image_config": {
+                "aspect_ratio": "1:1",
             }
-        ],
-        "modalities": ["image", "text"],
-        "image_config": {
-            "aspect_ratio": "1:1",
-        }
-    })
+        })
+    except Exception as e:
+        print("Image generation failed:", e)
+        return {"image": None}
 
     image_url = None
     try:
