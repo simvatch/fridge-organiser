@@ -22,12 +22,19 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("fridge")
   const [detectedItems, setDetectedItems] = useState([])
   const [showDetectedModal, setShowDetectedModal] = useState(false)
+  const [recipesLoading, setRecipesLoading] = useState(false)
 
   useEffect(() => {
     checkAuth()
   }, [])
   useEffect(() => {
     checkItems()
+  }, [items])
+
+  useEffect (() => {
+    if (isAuthenticated && items.length > 0 && !recipesLoading) {
+      generateRecipes()
+    }
   }, [items])
 
   const checkAuth = async () => {
@@ -253,7 +260,7 @@ export default function App() {
   }
 
   const generateRecipes = async () => {
-    setLoading(true)
+    setRecipesLoading(true)
     try {
       const response = await fetch('https://fridge-organiser.onrender.com/recipes', {
         method: 'POST',
@@ -282,7 +289,7 @@ export default function App() {
       alert("Recipe generation failed")
     }
   
-    setLoading(false)
+    setRecipesLoading(false)
   }
 
   const generateImage = async (recipe, index) => {
@@ -557,54 +564,84 @@ export default function App() {
 
                 {activeTab === "recipes" && (
                   <>
-
-                    <button onClick={generateRecipes} className='add' disabled={loading}>
-                      {loading ? 'Generating...' : 'Generate Recipes'}
+                    <button
+                      onClick={generateRecipes}
+                      className="add"
+                      disabled={recipesLoading}
+                    >
+                      {recipesLoading
+                        ? "Generating New Recipes..."
+                        : "Generate New Recipes"}
                     </button>
 
-                    <div className='recipes-container'>
-                      {recipes.map((recipe, index) => (
-                        <div className='recipe-card' key={index}>
-                          <h2> {recipe.name}</h2>
-                          <div className='image-container'>
-                            {images[index] ? (
-                              <img src={images[index]} alt={recipe.name} />
-                            ) : imageLoading[index] ? (
-                              <button className='add' disabled>Generating image...</button>
-                            ) : (
-                              <button onClick={() => generateImage(recipe, index)} className='add'>
-                                Generate Preview
-                              </button>
-                            )}
-                          </div>
-                          <p>{recipe.description}</p>
-                          <div className='recipe-meta'>
-                            <span>👪 Serves: {recipe.servings || 'Not specified'}</span>
-                          </div>
-                          <div className='section'>
-                            <h3>🍽️ Steps</h3>
-                            <ol>
-                              {(recipe.steps || []).map((step, stepIndex) => (
-                                <li key={stepIndex}>{step}</li>
-                              ))}
-                            </ol>
-                          </div>
-                          {(recipe.missingIngredients || []).length > 0 && (
-                            <div className='section'>
-                              <h3>🛒 Missing Ingredients</h3>
-                              <ul>
-                                {recipe.missingIngredients.map((ingredient, index) => (
-                                  <li key={index}>{ingredient.charAt(0).toUpperCase() + ingredient.slice(1)}</li>
-                                ))}
-                              </ul>
+                    {recipesLoading && recipes.length === 0 ? (
+                      <div className='recipes-loading-container'>
+                        <div className='loading-spinner'></div>
+                        <p>Preparing recipes...</p>
+                      </div>
+                    ) : (
+                      <div className="recipes-container">
+                        {recipes.map((recipe, index) => (
+                          <div className="recipe-card" key={index}>
+                            <h2>{recipe.name}</h2>
+
+                            <div className="image-container">
+                              {images[index] ? (
+                                <img src={images[index]} alt={recipe.name} />
+                              ) : imageLoading[index] ? (
+                                <button className="add" disabled>
+                                  Generating image...
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => generateImage(recipe, index)}
+                                  className="add"
+                                >
+                                  Generate Preview
+                                </button>
+                              )}
                             </div>
-                          )}
-                          <div className="cook-time">
-                            <span>⏲️ Cook Time: {recipe.cookTime || 'Not specified'}</span>
+
+                            <p>{recipe.description}</p>
+
+                            <div className="recipe-meta">
+                              <span>
+                                👪 Serves: {recipe.servings || "Not specified"}
+                              </span>
+                            </div>
+
+                            <div className="section">
+                              <h3>🍽️ Steps</h3>
+                              <ol>
+                                {(recipe.steps || []).map((step, stepIndex) => (
+                                  <li key={stepIndex}>{step}</li>
+                                ))}
+                              </ol>
+                            </div>
+
+                            {(recipe.missingIngredients || []).length > 0 && (
+                              <div className="section">
+                                <h3>🛒 Missing Ingredients</h3>
+                                <ul>
+                                  {recipe.missingIngredients.map((ingredient, i) => (
+                                    <li key={i}>
+                                      {ingredient.charAt(0).toUpperCase() +
+                                        ingredient.slice(1)}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            <div className="cook-time">
+                              <span>
+                                ⏲️ Cook Time: {recipe.cookTime || "Not specified"}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </>
                 )}
 

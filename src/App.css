@@ -771,3 +771,41 @@
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+.recipes-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #556b9c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+.recipes-loading-container p {
+  font-size: 1.1rem;
+  color: #555;
+  font-weight: 500;
+  margin: 0;
+  animation: pulse 1.8s ease-in-out infinite;
+  font-family: "Comic Relief", system-ui, sans-serif;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
