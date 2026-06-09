@@ -23,6 +23,6 @@ Users are able to configure their preferred units for temperature (°C / °F), w
 
 ### Authentication
 
-The webapp supports user registration and login with JWT authentication, secured via HTTP-only cookies, with protected routes throughout. The login details and user prefrences are stored in a PostegreSQL. This allows each user to have personalised menus and recipes.
+The webapp supports user registration and login with JWT authentication, secured via HTTP-only cookies, with protected routes throughout. The login details and user preferences are stored in a PostgreSQL. This allows each user to have personalised menus and recipes.
 
 ---
