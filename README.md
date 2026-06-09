@@ -1,16 +1,29 @@
-# React + Vite
+# Fridge Organiser
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Fridge organiser is a project I came up with when thinking about what features I would want to have on my smart fridge. It is an AI powered recipe generator that uses PostgreSQL to manage each individual person's items in order for the AI to come up with recipes individually for each person.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+### Fridge Inventory Management
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Users can add items manually or by uploading an image using AI image recognition. They can remove individual or multiple items at once and the system automatically groups duplicate items and tracks current stock levels.
 
-## Expanding the ESLint configuration
+### Recipe Generation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Users can generate recipes based on ingredients currently in their fridge. Each recipe includes a name, description, an AI generated image based on the provided description, cooking steps, cook time, number of servings and a list of any missing ingredients.
+
+### Shopping List
+
+The shopping list tracks ingredients previously added to the fridge, identifies any that are no longer in stock and builds a dynamic shopping list from that information.
+
+### User Settings
+
+Users can configure their preferred units for temperature (°C / °F), weight (g / oz / lb) and volume (ml / litres / cups).
+
+### Authentication
+
+The webapp supports user registration and login with JWT authentication, secured via HTTP-only cookies, with protected routes throughout.
+
+---
