@@ -319,7 +319,8 @@ export default function App() {
     for (let start = 0; start < recipeList.length; start += batchSize) {
       const batch = recipeList.slice(start, start + batchSize)
       await Promise.all(
-        recipeList.map(async (recipe, i) => {
+        batch.map(async (recipe, offset) => {
+          const i = start + offset
           try {
             const res = await fetch(
               "https://fridge-organiser.onrender.com/image",
