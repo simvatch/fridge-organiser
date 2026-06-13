@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from backend.auth import router as auth_router
 from backend.database import connect_db, disconnect_db
 from backend.items import router as item_router
+from backend.settings import router as settings_router
 
 load_dotenv()
 
@@ -53,6 +54,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(item_router)
+app.include_router(settings_router)
 
 client = httpx.AsyncClient(
     http2=True,

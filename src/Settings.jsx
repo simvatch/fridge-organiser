@@ -9,24 +9,56 @@ export default function Settings({ isOpen, onClose }) {
     })
 
     useEffect(() => {
-        const saved = localStorage.getItem("settings")
+        const fetchSettings = async () => {
+            try {
+                const response = await fetch(
+                     "https://fridge-organiser.onrender.com/settings",
+                     {
+                        credentials: "include"
+                     }
+                )
 
-        if (saved) {
-            setSettings(JSON.parse(saved))
+                if (!response.ok) {
+                    throw new Error("Failed to fetch settings")
+                }
+
+                const data = await response.json()
+
+                setSettings({
+                    temperature: data.temperature,
+                    weight: data.weight,
+                    volume: data.volume
+                })
+            } catch (error) {
+                console.error(error)
+            }
         }
     }, [])
 
-    const updateSetting = (key, value) => {
+    const updateSetting = async (key, value) => {
         const updated = {
             ...settings,
             [key]: value
         }
 
         setSettings(updated)
-        localStorage.setItem(
-            "settings",
-            JSON.stringify(updated)
-        )
+        
+        try {
+            await fetch(
+                "https://fridge-organiser.onrender.com/settings",
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(updated)
+                }
+            )
+        } catch (error) {
+            console.error(error);
+            
+        }
     }
     if (!isOpen) return null
     
