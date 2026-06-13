@@ -7,6 +7,7 @@ export default function Settings({ isOpen, onClose }) {
         weight: "grams",
         volume: "ml"
     })
+    const [localSettings, setLocalSettings] = useState({ ...settings })
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -29,13 +30,48 @@ export default function Settings({ isOpen, onClose }) {
                     weight: data.weight,
                     volume: data.volume
                 })
+                setLocalSettings({
+                    temperature: data.temperature,
+                    weight: data.weight,
+                    volume: data.volume
+                })
             } catch (error) {
                 console.error(error)
             }
         }
 
-        fetchSettings()
-    }, [])
+        if (isOpen) {
+            fetchSettings()
+        }
+    }, [isOpen])
+
+    const handleLocalChange = (key, value) => {
+        setLocalSettings(prev => ({
+            ...prev,
+            [key]: value
+        }))
+    }
+
+    const handleSave = async () => {
+        try {
+            await fetch(
+                "https://fridge-organiser.onrender.com/settings",
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(localSettings)
+                }
+            )
+
+            setSettings(localSettings)
+            onClose()
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     const updateSetting = async (key, value) => {
         const updated = {
@@ -62,6 +98,12 @@ export default function Settings({ isOpen, onClose }) {
             
         }
     }
+
+    const handleCancel = () => {
+        setLocalSettings({ ...settings })
+        onClose()
+    }
+
     if (!isOpen) return null
     
     return (
@@ -70,15 +112,15 @@ export default function Settings({ isOpen, onClose }) {
                 <div className="settings-header">
                     <h2>Settings</h2>
 
-                    <button className="close-btn" onClick={onClose}>X</button>
+                    <button className="close-btn" onClick={handleCancel}>X</button>
                 </div>
 
                 <div className="settings-group">
                     <label>Temperature Unit</label>
                     <select
-                        value={settings.temperature}
+                        value={localSettings.temperature}
                         onChange={(e) =>
-                            updateSetting(
+                            handleLocalChange(
                                 "temperature",
                                 e.target.value
                             )
@@ -92,9 +134,9 @@ export default function Settings({ isOpen, onClose }) {
                 <div className="settings-group">
                     <label>Weight Unit</label>
                     <select
-                        value={settings.weight}
+                        value={localSettings.weight}
                         onChange={(e) =>
-                            updateSetting(
+                            handleLocalChange(
                                 "weight",
                                 e.target.value
                             )
@@ -110,9 +152,9 @@ export default function Settings({ isOpen, onClose }) {
                     <label>Volume Unit</label>
 
                     <select
-                        value={settings.volume}
+                        value={localSettings.volume}
                         onChange={(e) =>
-                            updateSetting(
+                            handleLocalChange(
                                 "volume",
                                 e.target.value
                             )
@@ -122,6 +164,12 @@ export default function Settings({ isOpen, onClose }) {
                         <option value="litres">Litres (l)</option>
                         <option value="cups">Cups</option>
                     </select>
+                </div>
+
+                <div className="settings-actions">
+                    <button className="cancel-btn" onClick={handleCancel}>Cancel</button>
+
+                    <button className="save-btn" onClick={handleSave}>Save Changes</button>
                 </div>
             </div>
         </div>

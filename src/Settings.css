@@ -19,8 +19,9 @@
   width: 90%;
   max-width: 400px;
   padding: 24px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 25px -5px rgba(0, 25, 95, 0.1), 0 10px 10px -5px rgba(0, 25, 95, 0.04);
   animation: modalSlideUp 0.25s ease-out;
+  border-top: 6px solid #00195f;
 }
 
 .settings-header {
@@ -71,27 +72,28 @@
 }
 
 .settings-group label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #555;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #00195f;
 }
 
 .settings-group select {
   width: 100%;
   padding: 10px 12px;
   font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #fafafa;
-  color: #333;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  color: #00195f;
   outline: none;
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: "Comic Relief", system-ui;
 }
 
 .settings-group select:focus {
-  border-color: #ff6b6b;
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+  border-color: #0033b8;
+  box-shadow: 0 0 0 3px rgba(0, 51, 184, 0.15);
 }
 
 @keyframes modalSlideUp {
@@ -103,4 +105,50 @@
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 24px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.cancel-btn {
+  background: transparent;
+  border: 1px solid #64748b;
+  padding: 8px 16px;
+  border-radius: 15px;
+  font-family: "Comic Relief", system-ui;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #94a3b8;
+}
+
+.save-btn {
+  background: #00195f; 
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-family: "Comic Relief", system-ui, sans-serif; 
+  font-weight: bold;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.save-btn:hover {
+  background-color: #0033b8;
+}
+
+.save-btn:active {
+  transform: scale(0.98);
 }
