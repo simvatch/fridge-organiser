@@ -22,7 +22,7 @@ async def get_settings(user=Depends(get_current_user), db=Depends(get_db)):
         FROM settings
         WHERE user_id = $1
         """,
-        user["id"]
+        user
     )
 
     if not settings:
@@ -37,7 +37,7 @@ async def get_settings(user=Depends(get_current_user), db=Depends(get_db)):
             )
             VALUES ($1, "celsius", "grams", "ml")
             """,
-            user["id"]
+            user
         )
 
     return dict(settings)
@@ -60,7 +60,7 @@ async def save_settings(settings: SettingsModel, user=Depends(get_current_user),
             weight = EXCLUDED.weight,
             volume = EXCLUDED.volume
         """,
-        user["id"],
+        user,
         settings.user_id,
         settings.temperature,
         settings.weight,
