@@ -33,6 +33,8 @@ export default function Settings({ isOpen, onClose }) {
                 console.error(error)
             }
         }
+
+        fetchSettings()
     }, [])
 
     const updateSetting = async (key, value) => {
