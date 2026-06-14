@@ -713,12 +713,16 @@ export default function App() {
                               <div className="section">
                                 <h3>🛒 Missing Ingredients</h3>
                                 <ul>
-                                  {recipe.missingIngredients.map((ingredient, i) => (
-                                    <li key={i}>
-                                      {ingredient.charAt(0).toUpperCase() +
-                                        ingredient.slice(1)}
-                                    </li>
-                                  ))}
+                                  {recipe.missingIngredients.map((ingredient, i) => {
+                                    const label = typeof ingredient === "string"
+                                    ? ingredient
+                                    : ingredient.name || ingredient.ingredient || JSON.stringify(ingredient)
+                                    return (
+                                      <li key={i}>
+                                        {label.charAt(0).toUpperCase() + label.slice(1)}
+                                      </li>
+                                    )
+                                  })}
                                 </ul>
                               </div>
                             )}
