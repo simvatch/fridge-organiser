@@ -114,6 +114,10 @@ async def get_recipes(request: FridgeRequest):
     - Beginner friendly
     - servings must be integer
     - include imagePrompt
+    - use ONLY metric units
+    - Temperatures must be Celsius
+    - Weight must be grams
+    - Volume must be millilitres
     - return ONLY JSON
 
     Format:
@@ -124,13 +128,23 @@ async def get_recipes(request: FridgeRequest):
         "name": "",
         "description": "",
         "servings": "",
-        "ingredients": [],
+        "ingredients": [
+            {
+                "name": "",
+                "quantity": 0,
+                "unit": ""
+            }
+        ],
         "steps": [
             "step 1",
             "step 2"
         ],
         "missingIngredients": [],
         "cookTime": "",
+        "temperature": {
+            "value": 0,
+            "unit": "C"
+        },
         "imagePrompt": ""
         }}
     ]

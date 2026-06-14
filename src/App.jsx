@@ -4,6 +4,7 @@ import Login from './Login'
 import Signup from './Signup'
 import Settings from './Settings'
 import './App.css'
+import { use } from 'react'
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null)
@@ -25,13 +26,21 @@ export default function App() {
   const [showDetectedModal, setShowDetectedModal] = useState(false)
   const [recipesLoading, setRecipesLoading] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [settings, setSettings] = useState(null)
 
   useEffect(() => {
     checkAuth()
   }, [])
+
   useEffect(() => {
     checkItems()
   }, [items])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchSettings()
+    }
+  }, [isAuthenticated])
 
   useEffect (() => {
     if (isAuthenticated && items.length > 0 && !recipesLoading && recipes.length === 0) {
@@ -52,6 +61,7 @@ export default function App() {
         setIsAuthenticated(true)
         fetchItems()
         fetchHistory()
+        fetchSettings()
       } else {
         setIsAuthenticated(false)
       }
@@ -353,6 +363,24 @@ export default function App() {
           }
         })
       )
+    }
+  }
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch(
+        "https://fridge-organiser.onrender.com/settings",
+        {
+          credentials: "include"
+        }
+      )
+
+      if (!res.ok) throw new Error("Failed to fetch settings")
+
+      const data = await res.json()
+      setSettings(data)
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -795,6 +823,8 @@ export default function App() {
                 <Settings
                   isOpen={showSettings}
                   onClose={() => setShowSettings(false)}
+                  settings={settings}
+                  setSettings={setSettings}
                 />
               </div>
             ) : (
