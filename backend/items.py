@@ -83,7 +83,7 @@ async def delete_item(item_id: int, user_id: int = Depends(get_current_user), db
         result = await db.execute(
             """
             DELETE FROM items
-            WHERE id = $1
+            WHERE id = $1 and user_id = $2
             """,
             item_id,
             user_id

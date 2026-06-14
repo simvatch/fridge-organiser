@@ -27,6 +27,8 @@ export default function App() {
   const [recipesLoading, setRecipesLoading] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [settings, setSettings] = useState(null)
+  const [cookedRecipe, setCookedRecipe] = useState(null)
+  const [cookedIngredients, setCookedIngredients] = useState([])
 
   useEffect(() => {
     checkAuth()
@@ -364,6 +366,37 @@ export default function App() {
         })
       )
     }
+  }
+
+  const openCookedModal = (recipe) => {
+    const matched = recipe.ingredients.map(ing => {
+      const fridgeMatch = Object.entries(groupedItems).find(([name]) =>
+        name.includes(ing.name.toLowerCase()) || ing.name.toLowerCase().includes(name) 
+      )
+
+      return {
+        name: ing.name,
+        quantity: ing.quantity,
+        unit: ing.unit,
+        checked: !!fridgeMatch,
+        inFridge: !!fridgeMatch,
+        available: fridgeMatch ? fridgeMatch[1].count : 0,
+        ids: fridgeMatch ? fridgeMatch[1].ids : [],
+        removeCount: fridgeMatch ? Math.min(ing.quantity, fridgeMatch[1].count) : 0
+      }
+    })
+    
+    setCookedRecipe(recipe)
+    setCookedIngredients(matched)
+  }
+
+  const confirmCooked = async () => {
+    const toRemove = cookedIngredients.filter(ing => ing.checked && ing.inFridge && ing.removeCount > 0)
+    for (const ing of toRemove) {
+      await deleteMultipleItems(ing.ids, ing.removeCount)
+    }
+    setCookedIngredients(null)
+    setCookedIngredients([])
   }
 
   const fetchSettings = async () => {
@@ -709,6 +742,8 @@ export default function App() {
                               </ol>
                             </div>
 
+                            <button className='add' onClick={() => openCookedModal(recipe)}>Mark as Cooked</button>
+
                             {(recipe.missingIngredients || []).length > 0 && (
                               <div className="section">
                                 <h3>🛒 Missing Ingredients</h3>
@@ -824,6 +859,97 @@ export default function App() {
                     </div>
                   </div>
                 )}
+
+                {cookedRecipe && (
+                  <div className="modal-overlay">
+                    <div className="modal-window">
+                      <h2 className="modal-header">Which ingredients did you use from your fridge?</h2>
+                      <div className="modal-content">
+                        {cookedIngredients.map((ing, index) => (
+                          <div
+                            key={index}
+                            className="detected-card"
+                            style={{
+                              opacity: !ing.inFridge ? 0.4 : 1,
+                              transition: "opacity 0.2s ease",
+                              backgroundColor: !ing.inFridge ? "#f5f5f5" : ""
+                            }}
+                          >
+                            <label style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1 }}>
+                              <input
+                                type="checkbox"
+                                checked={ing.checked}
+                                disabled={!ing.inFridge}
+                                onChange={(e) => {
+                                  const updated = cookedIngredients.map((curr, idx) =>
+                                    idx === index ? { ...curr, checked: e.target.checked } : curr
+                                  )
+                                  setCookedIngredients(updated)
+                                }}
+                              />
+                              <span className="detected-item-name">
+                                {ing.name}
+                                {!ing.inFridge && <span style={{ fontSize: "0.75rem", color: "#999", marginLeft: "6px" }}>not in fridge</span>}
+                              </span>
+                            </label>
+
+                            {ing.inFridge && ing.checked && (
+                              <div className="quantity-controls">
+                                <button
+                                  type="button"
+                                  className="qty-btn"
+                                  onClick={() => {
+                                    const updated = cookedIngredients.map((curr, idx) =>
+                                      idx === index ? { ...curr, removeCount: Math.max(0, curr.removeCount - 1) } : curr
+                                    )
+                                    setCookedIngredients(updated)
+                                  }}
+                                >-</button>
+                                <input
+                                  type="number"
+                                  className="qty-input"
+                                  min="0"
+                                  max={ing.available}
+                                  value={ing.removeCount}
+                                  style={{ width: "40px", textAlign: "center", border: "1px solid #ccc", borderRadius: "4px", margin: "0 5px" }}
+                                  onChange={(e) => {
+                                    const val = e.target.value === "" ? "" : Math.min(Number(e.target.value), ing.available)
+                                    const updated = cookedIngredients.map((curr, idx) =>
+                                      idx === index ? { ...curr, removeCount: val } : curr
+                                    )
+                                    setCookedIngredients(updated)
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  className="qty-btn"
+                                  onClick={() => {
+                                    const updated = cookedIngredients.map((curr, idx) =>
+                                      idx === index ? { ...curr, removeCount: Math.min(ing.available, curr.removeCount + 1) } : curr
+                                    )
+                                    setCookedIngredients(updated)
+                                  }}
+                                >+</button>
+                                <span style={{ fontSize: "0.8rem", color: "#666", marginLeft: "4px" }}>
+                                  / {ing.available} in fridge
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="modal-footer">
+                        <button className="btn-secondary" onClick={() => setCookedRecipe(null)}>Cancel</button>
+                        <button
+                          className="btn-primary"
+                          onClick={confirmCooked}
+                          disabled={!cookedIngredients.some(ing => ing.checked && ing.inFridge && ing.removeCount > 0)}
+                        >Remove from Fridge</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <Settings
                   isOpen={showSettings}
                   onClose={() => setShowSettings(false)}
