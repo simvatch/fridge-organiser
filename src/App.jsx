@@ -395,7 +395,7 @@ export default function App() {
     for (const ing of toRemove) {
       await deleteMultipleItems(ing.ids, ing.removeCount)
     }
-    setCookedIngredients(null)
+    setCookedRecipe(null)
     setCookedIngredients([])
   }
 
