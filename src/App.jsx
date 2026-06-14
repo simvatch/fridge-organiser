@@ -3,8 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './Login'
 import Signup from './Signup'
 import Settings from './Settings'
+import { convertStepText } from './conversions'
 import './App.css'
-import { use } from 'react'
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null)
@@ -704,7 +704,7 @@ export default function App() {
                               <h3>🍽️ Steps</h3>
                               <ol>
                                 {(recipe.steps || []).map((step, stepIndex) => (
-                                  <li key={stepIndex}>{step}</li>
+                                  <li key={stepIndex}>{convertStepText(step, settings)}</li>
                                 ))}
                               </ol>
                             </div>

@@ -129,11 +129,11 @@ async def get_recipes(request: FridgeRequest):
         "description": "",
         "servings": "",
         "ingredients": [
-            {
+            {{
                 "name": "",
                 "quantity": 0,
                 "unit": ""
-            }
+            }}
         ],
         "steps": [
             "step 1",
@@ -141,10 +141,10 @@ async def get_recipes(request: FridgeRequest):
         ],
         "missingIngredients": [],
         "cookTime": "",
-        "temperature": {
+        "temperature": {{
             "value": 0,
             "unit": "C"
-        },
+        }},
         "imagePrompt": ""
         }}
     ]

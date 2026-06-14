@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import "./Settings.css"
 
-export default function Settings({ isOpen, onClose }) {
-    const [settings, setSettings] = useState({
+export default function Settings({ isOpen, onClose, settings, setSettings }) {
+    const [localSettings, setLocalSettings] = useState(
+    settings || {
         temperature: "celsius",
         weight: "grams",
         volume: "ml"
-    })
-    const [localSettings, setLocalSettings] = useState({ ...settings })
+    }
+)
 
     useEffect(() => {
         const fetchSettings = async () => {
