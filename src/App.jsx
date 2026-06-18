@@ -170,7 +170,7 @@ export default function App() {
       const uniqueIngredients = [...new Set(data.ingredients)]
 
       setDetectedItems(
-        uniqueIngredients.map(item => ({
+        uniqueIngredients.sort((a, b) => a.localeCompare(b)).map(item => ({
           name: item,
           quantity: 1
         }))
@@ -582,7 +582,7 @@ export default function App() {
                     <div className='items'> 
                       <div className="list-header">Current Stock:</div>
                       <ul>
-                        {Object.entries(groupedItems).map(([name, data]) => (
+                        {Object.entries(groupedItems).sort(([, a], [, b]) => a.displayName.localeCompare(b.displayName)).map(([name, data]) => (
                           <li key={name} className='item-row-wrapper'>
                             <div key={name} className="item-row">
 
@@ -780,7 +780,7 @@ export default function App() {
                     <div className='items'>
                       <div className="list-header">Need to Buy:</div>
                       <ul>
-                        {needToBuy.map((item, index) => (
+                        {[...needToBuy].sort((a, b) => a.localeCompare(b)).map((item, index) => (
                           <li key={index} className="item-row">{item}</li>
                         ))}
                       </ul>
