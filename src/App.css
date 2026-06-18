@@ -909,3 +909,99 @@
   padding: 15px 20px;
   box-sizing: border-box;
 }
+
+.auto-badge {
+  font-size: 0.75rem;
+  color: #999;
+  margin-left: 6px;
+}
+
+.delete-warning-text {
+  font-size: 0.85rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.delete-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.auto-delete-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 14px 16px;
+  background-color: #fff5f5;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-left: 5px solid #d9534f;
+  margin-top: -4px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  animation: slideDown 0.2s ease-out;
+}
+
+.auto-delete-title {
+  font-family: "Comic Relief", system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #d9534f
+}
+
+.auto-delete-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #444;
+  cursor: pointer;
+  user-select: none;
+}
+
+.auto-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.auto-delete-btn-confirm {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: "Comic Relief", system-ui, sans-serif;
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.1s, transform 0.1s;
+}
+
+.auto-delete-btn-cancel {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: "Comic Relief", system-ui, sans-serif;
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.auto-delete-btn-cancel:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+}

@@ -33,7 +33,7 @@ export default function App() {
   const [newShoppingItem, setNewShoppingItem] = useState("")
   const [dismissedAutoItems, setDismissedAutoItems] = useState([])
   const [confirmDeleteAuto, setConfirmDeleteAuto] = useState(null)
-  const [dontsShowAgain, setDontShowAgain] = useState(false)
+  const [dontShowAgain, setDontShowAgain] = useState(false)
 
   useEffect(() => {
     checkAuth()
@@ -478,7 +478,7 @@ export default function App() {
   }
 
   const confirmAutoDelete = async () => {
-    if (dontsShowAgain) {
+    if (dontShowAgain) {
       try {
         await fetch(
           `https://fridge-organiser.onrender.com/items/history/${encodeURIComponent(confirmDeleteAuto)}`,
@@ -891,7 +891,7 @@ export default function App() {
                                 <span>
                                   {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
                                   {!item.manual && (
-                                    <span style={{ fontSize: "0.75rem", color: "#999", marginLeft: "6px" }}>auto</span>
+                                    <span className='auto-badge'>auto</span>
                                   )}
                                 </span>
                                 <button
@@ -915,9 +915,9 @@ export default function App() {
                               </div>
 
                               {confirmDeleteAuto === item.name && (
-                                <div className="delete-controls" style={{ flexDirection: "column", alignItems: "flex-start", gap: "8px" }}>
-                                  <span style={{ fontSize: "0.85rem" }}>Remove from list?</span>
-                                  <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.8rem", cursor: "pointer" }}>
+                                <div className="auto-delete-panel">
+                                  <span className="auto-delete-title">Remove from list?</span>
+                                  <label className="auto-delete-checkbox-label">
                                     <input
                                       type="checkbox"
                                       checked={dontShowAgain}
@@ -925,9 +925,19 @@ export default function App() {
                                     />
                                     Don't show this item again
                                   </label>
-                                  <div style={{ display: "flex", gap: "8px" }}>
-                                    <button className="confirm-delete" onClick={confirmAutoDelete}>Confirm</button>
-                                    <button onClick={() => { setConfirmDeleteAuto(null); setDontShowAgain(false) }}>Cancel</button>
+                                  <div className="auto-delete-actions">
+                                    <button className="auto-delete-btn-confirm" onClick={confirmAutoDelete}>
+                                      Confirm
+                                    </button>
+                                    <button 
+                                      className="auto-delete-btn-cancel"
+                                      onClick={() => { 
+                                        setConfirmDeleteAuto(null); 
+                                        setDontShowAgain(false);
+                                      }}
+                                    >
+                                      Cancel
+                                    </button>
                                   </div>
                                 </div>
                               )}
