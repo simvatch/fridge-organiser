@@ -31,6 +31,9 @@ export default function App() {
   const [cookedIngredients, setCookedIngredients] = useState([])
   const [shoppingList, setShoppingList] = useState([])
   const [newShoppingItem, setNewShoppingItem] = useState("")
+  const [dismissedAutoItems, setDismissedAutoItems] = useState([])
+  const [confirmDeleteAuto, setConfirmDeleteAuto] = useState(null)
+  const [dontsShowAgain, setDontShowAgain] = useState(false)
 
   useEffect(() => {
     checkAuth()
@@ -474,6 +477,28 @@ export default function App() {
     }
   }
 
+  const confirmAutoDelete = async () => {
+    if (dontsShowAgain) {
+      try {
+        await fetch(
+          `https://fridge-organiser.onrender.com/items/history/${encodeURIComponent(confirmDeleteAuto)}`,
+          {
+            method: "DELETE",
+            credentials: "include"
+          }
+        )
+
+        fetchHistory()
+      } catch (error) {
+        console.error("History delete error:", error)
+      }
+    } else {
+      setDismissedAutoItems(prev => [...prev, confirmDeleteAuto])
+    }
+    setConfirmDeleteAuto(null)
+    setDontShowAgain(false)
+  }
+
   const loginUser = () => {
     setIsAuthenticated(true)
     fetchItems()
@@ -833,38 +858,53 @@ export default function App() {
 
                 {activeTab === "shopping" && (
                   <>
-                    <form 
-                      className='add-item-form'
-                      onSubmit={(e) => {e.preventDefault(); addShoppingItem() }}
+                    <form
+                      className="add-item-form"
+                      onSubmit={(e) => { e.preventDefault(); addShoppingItem() }}
                     >
                       <input
                         type="text"
-                        placeholder='e.g., Bread, Butter...'
+                        placeholder="e.g., Bread, Butter..."
                         value={newShoppingItem}
                         onChange={(e) => setNewShoppingItem(e.target.value)}
-                        className='add-item-input'
+                        className="add-item-input"
                       />
-                      <button type="submit" className='add'>Add Item</button>
+                      <button type="submit" className="add">Add Item</button>
                     </form>
 
-                    <div className='items'>
+                    <div className="items">
                       <div className="list-header">Shopping List:</div>
                       <ul>
                         {[
-                          ...shoppingList.map(item => ({name: item.name, id: item.id, manual: true})),
-                          ...needToBuy.filter(name => !shoppingList.some(s => s.name === name)).map(name => ({ name, id: null, manual: false}))
+                          ...shoppingList.map(item => ({ name: item.name, id: item.id, manual: true })),
+                          ...needToBuy
+                            .filter(name =>
+                              !shoppingList.some(s => s.name === name) &&
+                              !dismissedAutoItems.includes(name)
+                            )
+                            .map(name => ({ name, id: null, manual: false }))
                         ]
                           .sort((a, b) => a.name.localeCompare(b.name))
                           .map((item, index) => (
-                            <li key={index} className='item-row'>
-                              <span>
-                                {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
-                                {!item.manual && (
-                                  <span style={{ fontSize: "0.75rem", color: "#999", marginLeft: "6px" }}>auto</span>
-                                )}
-                              </span>
-                              {item.manual && (
-                                <button className="delete-btn" onClick={() => deleteShoppingItem(item.id)}>
+                            <li key={index} className="item-row-wrapper">
+                              <div className="item-row">
+                                <span>
+                                  {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
+                                  {!item.manual && (
+                                    <span style={{ fontSize: "0.75rem", color: "#999", marginLeft: "6px" }}>auto</span>
+                                  )}
+                                </span>
+                                <button
+                                  className="delete-btn"
+                                  onClick={() => {
+                                    if (item.manual) {
+                                      deleteShoppingItem(item.id)
+                                    } else {
+                                      setConfirmDeleteAuto(item.name)
+                                      setDontShowAgain(false)
+                                    }
+                                  }}
+                                >
                                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d9534f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline points="3 6 5 6 21 6"></polyline>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -872,10 +912,27 @@ export default function App() {
                                     <line x1="14" y1="11" x2="14" y2="17"></line>
                                   </svg>
                                 </button>
+                              </div>
+
+                              {confirmDeleteAuto === item.name && (
+                                <div className="delete-controls" style={{ flexDirection: "column", alignItems: "flex-start", gap: "8px" }}>
+                                  <span style={{ fontSize: "0.85rem" }}>Remove from list?</span>
+                                  <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.8rem", cursor: "pointer" }}>
+                                    <input
+                                      type="checkbox"
+                                      checked={dontShowAgain}
+                                      onChange={(e) => setDontShowAgain(e.target.checked)}
+                                    />
+                                    Don't show this item again
+                                  </label>
+                                  <div style={{ display: "flex", gap: "8px" }}>
+                                    <button className="confirm-delete" onClick={confirmAutoDelete}>Confirm</button>
+                                    <button onClick={() => { setConfirmDeleteAuto(null); setDontShowAgain(false) }}>Cancel</button>
+                                  </div>
+                                </div>
                               )}
                             </li>
-                          ))
-                        }
+                          ))}
                       </ul>
                     </div>
                   </>

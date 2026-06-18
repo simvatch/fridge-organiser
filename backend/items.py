@@ -116,3 +116,20 @@ async def get_history(user_id: int = Depends(get_current_user), db=Depends(get_d
     except Exception as e:
         print("History error:", e)
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.delete("/history/{name}")
+async def delete_history_item(name: str, user_id: int = Depends(get_current_user), db=Depends(get_db)):
+    try: 
+        await db.execute(
+            """
+            DELETE FROM item_history
+            WHERE user_id = $1 AND name = $2
+            """,
+            user_id,
+            name.lower()
+        )
+        return {"message": "History item deleted"}
+    
+    except Exception as e:
+        print("History delete error:", e)
+        raise HTTPException(status_code=500, detail=str(e))
