@@ -513,6 +513,7 @@ export default function App() {
         )
 
         fetchHistory()
+        setDismissedAutoItems(prev => [...prev, confirmDeleteAuto])
       } catch (error) {
         console.error("History delete error:", error)
       }
@@ -735,8 +736,8 @@ export default function App() {
                                   <span className="item-count">
                                     x{data.count}
                                   </span>
-                                {getExpiryBadge(data.expires_at)}
                                 )}
+                                {getExpiryBadge(data.expires_at)}
                               </span>
 
                               <button
