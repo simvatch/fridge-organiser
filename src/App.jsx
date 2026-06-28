@@ -38,6 +38,7 @@ export default function App() {
   const [expandedShoppingItem, setExpandedShoppingItem] = useState(null)
   const [deleteShoppingAmount, setDeleteShoppingAmount] = useState({})
   const [newItemExpiry, setNewItemExpiry] = useState("")
+  const [addingItems, setAddingItems] = useState(false)
 
   useEffect(() => {
     checkAuth()
@@ -154,7 +155,9 @@ export default function App() {
     if (!expiresAt) return null
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    const expiry = new Date(expiresAt)
+
+    const [year, month, day] = expiresAt.split("-").map(Number)
+    const expiry = new Date(year, month -1, day)
     const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24))
 
     if (diffDays < 0) return <span className="expiry-badge expired">❌ Expired</span>
@@ -198,7 +201,8 @@ export default function App() {
       setDetectedItems(
         uniqueIngredients.sort((a, b) => a.localeCompare(b)).map(item => ({
           name: item,
-          quantity: 1
+          quantity: 1,
+          expires_at: ""
         }))
       )
       setShowDetectedModal(true)
@@ -214,6 +218,8 @@ export default function App() {
   }
 
   const addDetectedItems = async () => {
+    setAddingItems(true)
+
     try {
       const promises = []
       const itemsToAdd = detectedItems.filter(item => Number(item.quantity) > 0)
@@ -231,7 +237,8 @@ export default function App() {
                   "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                  name: item.name
+                  name: item.name,
+                  expires_at: item.expires_at || null
                 })
               }
             )
@@ -249,6 +256,7 @@ export default function App() {
       console.error(error)
       alert("Failed to add items")
     }
+    setAddingItems(false)
   }
 
   const checkItems = () => {
@@ -557,7 +565,7 @@ export default function App() {
     fetchItems()
     fetchHistory()
     fetchDismissed()
-    fetchShoppingList
+    fetchShoppingList()
   }
 
   const logoutUser = async () => {
@@ -581,6 +589,8 @@ export default function App() {
         displayName: item.name,
         expires_at: item.expires_at
       }
+    } else if (!acc[name].expires_at && item.expires_at) {
+      acc[name].expires_at = item.expires_at
     }
 
     acc[name].count++
@@ -1060,74 +1070,91 @@ export default function App() {
                     </div>
                   </>
                 )}
-
                 {showDetectedModal && (
                   <div className="modal-overlay">
                     <div className="modal-window">
                       <h2 className='modal-header'>Review or adjust quantities before adding them to your fridge.</h2>
                       <div className='modal-content'>
                         {detectedItems.map((item, index) => (
-                          <div 
-                            key={index} 
+                          <div
+                            key={index}
                             className="detected-card"
                             style={{
-                                opacity: item.quantity === 0 ? 0.4 : 1,
-                                transition: "opacity 0.2s ease",
-                                backgroundColor: item.quantity === 0 ? "#f5f5f5" : ""
-                              }}
+                              opacity: item.quantity === 0 ? 0.4 : 1,
+                              transition: "opacity 0.2s ease",
+                              backgroundColor: item.quantity === 0 ? "#f5f5f5" : "",
+                              flexDirection: "column",
+                              alignItems: "stretch",
+                              gap: "8px"
+                            }}
                           >
-                            <span className='detected-item-name'>{item.name}</span>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span className='detected-item-name'>{item.name}</span>
+                              <div className="quantity-controls">
+                                <button
+                                  type='button'
+                                  className='qty-btn'
+                                  onClick={() => {
+                                    const updated = detectedItems.map((curr, idx) =>
+                                      idx === index ? { ...curr, quantity: Math.max(0, curr.quantity - 1) } : curr
+                                    )
+                                    setDetectedItems(updated)
+                                  }}
+                                >-</button>
+                                <input
+                                  type="number"
+                                  className='qty-input'
+                                  min="0"
+                                  value={item.quantity ?? ""}
+                                  style={{ width: "40px", textAlign: "center", border: "1px solid #ccc", borderRadius: "4px", margin: "0 5px" }}
+                                  onChange={(e) => {
+                                    const value = e.target.value
+                                    const updated = detectedItems.map((curr, idx) =>
+                                      idx === index ? { ...curr, quantity: value === "" ? "" : Number(value) } : curr
+                                    )
+                                    setDetectedItems(updated)
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  className='qty-btn'
+                                  onClick={() => {
+                                    const updated = detectedItems.map((curr, idx) =>
+                                      idx === index ? { ...curr, quantity: curr.quantity + 1 } : curr
+                                    )
+                                    setDetectedItems(updated)
+                                  }}
+                                >+</button>
+                              </div>
+                            </div>
 
-                            <div className="quantity-controls">
-                              <button
-                                type='button'
-                                className='qty-btn'
-                                onClick={() => {
-                                  const updated = detectedItems.map((curr, idx) => 
-                                    idx === index ? { ...curr, quantity: Math.max(0, curr.quantity - 1) } : curr
-                                  );
-                                  setDetectedItems(updated);
-                                }}
-                              >-</button>
-
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                              <label style={{ fontSize: "0.8rem", color: "#666", whiteSpace: "nowrap" }}>Expiry:</label>
                               <input
-                                type="number"
-                                className='qty-input'
-                                min="0"
-                                value={item.quantity ?? ""}
-                                style={{
-                                  width: "40px",
-                                  textAlign: "center",
-                                  border: "1px solid #ccc",
-                                  borderRadius: "4px",
-                                  margin: "0 5px",
-                                }}
+                                type="date"
+                                className="expiry-input"
+                                value={item.expires_at || ""}
+                                style={{ flex: 1, fontSize: "0.8rem" }}
                                 onChange={(e) => {
-                                  const value = e.target.value;
                                   const updated = detectedItems.map((curr, idx) =>
-                                    idx === index ? { ...curr, quantity: value === "" ? "": Number(value) } : curr
-                                  );
-                                  setDetectedItems(updated)
-                                }}
-                              />
-
-                              <button
-                                type="button"
-                                className='qty-btn'
-                                onClick={() => {
-                                  const updated = detectedItems.map((curr, idx) => 
-                                    idx === index ? { ...curr, quantity: curr.quantity + 1 } : curr
+                                    idx === index ? { ...curr, expires_at: e.target.value } : curr
                                   )
                                   setDetectedItems(updated)
                                 }}
-                              >+</button>
+                              />
                             </div>
                           </div>
                         ))}
                       </div>
                       <div className="modal-footer">
                         <button onClick={() => setShowDetectedModal(false)} className='btn-secondary'>Cancel</button>
-                        <button className="btn-primary" onClick={addDetectedItems} disabled={!detectedItems.some(item => item.quantity > 0)}>Add To Fridge</button>
+                        <button
+                          className="btn-primary"
+                          onClick={addDetectedItems}
+                          disabled={!detectedItems.some(item => item.quantity > 0) || addingItems}
+                        >
+                          {addingItems ? "Adding..." : "Add To Fridge"}
+                        </button>
                       </div>
                     </div>
                   </div>
