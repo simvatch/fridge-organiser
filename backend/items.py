@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from backend.database import get_db
 from backend.auth import get_current_user
+from datetime import date
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -21,7 +22,7 @@ async def add_item(item: ItemCreate, user_id: int = Depends(get_current_user), d
             """,
             user_id,
             item.name.lower(),
-            item.expires_at
+            date.fromisoformat(item.expires_at) if item.expires_at else None
         )
 
         existing = await db.fetchrow(
