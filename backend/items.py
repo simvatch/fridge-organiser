@@ -133,3 +133,51 @@ async def delete_history_item(name: str, user_id: int = Depends(get_current_user
     except Exception as e:
         print("History delete error:", e)
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/dismissed")
+async def get_dismissed(user_id: int = Depends(get_current_user), db=Depends(get_db)):
+    try:
+        rows = await db.fetch(
+            """
+            SELECT name
+            FROM dismissed_shopping_items
+            WHERE user_id = $1
+            """,
+            user_id
+        )
+        return {"dismissed": [row["name"] for row in rows]}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/dismissed")
+async def add_dismissed(item: ItemCreate, user_id: int = Depends(get_current_user), db=Depends(get_db)):
+    try:
+        await db.execute(
+            """
+            INSERT INTO dismissed_shopping_items (user_id, name)
+            VALUES ($1, $2)
+            ON CONFLICT (user_id, name) DO NOTHING
+            """,
+            user_id,
+            item.name.lower()
+        )
+        return {"message": "Item dismissed"}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.delete("/dismissed")
+async def clear_dismissed(user_id: int = Depends(get_current_user), db=Depends(get_db)):
+    try:
+        await db.execute(
+            """
+            DELETE FROM dismissed_shopping_items
+            WHERE user_id = $1
+            """,
+            user_id
+        )
+        return {"message": "Dismissed items cleared"}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

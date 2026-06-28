@@ -493,10 +493,38 @@ export default function App() {
         console.error("History delete error:", error)
       }
     } else {
-      setDismissedAutoItems(prev => [...prev, confirmDeleteAuto])
+      try {
+        await fetch(
+          "https://fridge-organiser.onrender.com/items/dismissed",
+          {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: confirmDeleteAuto })
+          }
+        )
+        fetchDismissed()
+      } catch (error) {
+        console.error("Dismiss error:", errorzs)
+      }
     }
     setConfirmDeleteAuto(null)
     setDontShowAgain(false)
+  }
+
+  const fetchDismissed = async () => {
+    try {
+      const res = await fetch(
+        "https://fridge-organiser.onrender.com/items/dismissed",
+        {
+          credentials: "include"
+        }
+      )
+      const data = await res.json()
+      setDismissedAutoItems(data.dismissed || [])
+    } catch (error) {
+      console.error("Fetched dismissed error:", error)
+    }
   }
 
   const loginUser = () => {
@@ -877,7 +905,17 @@ export default function App() {
                         <span>Shopping List:</span>
                         
                           {dismissedAutoItems.length > 0 && (
-                            <button onClick={() => setDismissedAutoItems([])} className='reset-btn'>Reset Shopping List</button>
+                            <button
+                              onClick={async () => {
+                                await fetch(
+                                  "https://fridge-organiser.onrender.com/items/dismissed",
+                                  {
+                                    method: "DELETE",
+                                    credentials: "include"
+                                  }
+                                )
+                                setDismissedAutoItems([])}}
+                                className='reset-btn'>Reset Shopping List</button>
                           )}  
                       </div>
                       <ul>
