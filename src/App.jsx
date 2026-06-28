@@ -37,6 +37,7 @@ export default function App() {
   const [newShoppingQty, setNewShoppingQty] = useState(1)
   const [expandedShoppingItem, setExpandedShoppingItem] = useState(null)
   const [deleteShoppingAmount, setDeleteShoppingAmount] = useState({})
+  const [newItemExpiry, setNewItemExpiry] = useState("")
 
   useEffect(() => {
     checkAuth()
@@ -130,7 +131,8 @@ export default function App() {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            name: itemToSubmit
+            name: itemToSubmit,
+            expires_at: newItemExpiry || null
           })
         }
       )
@@ -140,11 +142,25 @@ export default function App() {
       console.log(data)
 
       setNewItemName("")
+      setNewItemExpiry("")
       fetchItems()
       fetchHistory()
     } catch (error) {
       console.error("Add item error:", error)
     }
+  }
+
+  const getExpiryBadge = (expiresAt) => {
+    if (!expiresAt) return null
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const expiry = new Date(expiresAt)
+    const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24))
+
+    if (diffDays < 0) return <span className="expiry-badge expired">❌ Expired</span>
+    if (diffDays === 0) return <span className="expiry-badge expiring-soon">⚠️ Today</span>
+    if (diffDays <= 3) return <span className="expiry-badge expiring-soon">⚠️ {diffDays}d</span>
+    return null
   }
 
   const detectItemsFromImage = async () => {
@@ -561,7 +577,8 @@ export default function App() {
       acc[name] = {
         count: 0,
         ids: [],
-        displayName: item.name
+        displayName: item.name,
+        expires_at: item.expires_at
       }
     }
 
@@ -651,10 +668,16 @@ export default function App() {
                     >
                       <input
                         type="text"
-                        placeholder='e.g., Milk Eggs, Apples...'
+                        placeholder='e.g., Milk, Eggs, Apples...'
                         value={newItemName}
                         onChange={(e) => setNewItemName(e.target.value)}
                         className='add-item-input'
+                      />
+                      <input
+                        type="date"
+                        value={newItemExpiry}
+                        onChange={(e) => setNewItemExpiry(e.target.value)}
+                        className='expiry-input'
                       />
                       <button type="submit" className='add'>Add Item</button>
                     </form>
@@ -712,6 +735,7 @@ export default function App() {
                                   <span className="item-count">
                                     x{data.count}
                                   </span>
+                                {getExpiryBadge(data.expires_at)}
                                 )}
                               </span>
 

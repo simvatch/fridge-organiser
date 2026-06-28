@@ -7,6 +7,7 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 class ItemCreate(BaseModel):
     name: str
+    expires_at: str | None = None
 
 @router.post("/add")
 async def add_item(item: ItemCreate, user_id: int = Depends(get_current_user), db=Depends(get_db)):
@@ -15,11 +16,12 @@ async def add_item(item: ItemCreate, user_id: int = Depends(get_current_user), d
 
         await db.execute(
             """
-            INSERT INTO items (user_id, name)
-            VALUES ($1, $2)
+            INSERT INTO items (user_id, name, expires_at)
+            VALUES ($1, $2, $3)
             """,
             user_id,
-            item.name.lower()
+            item.name.lower(),
+            item.expires_at
         )
 
         existing = await db.fetchrow(
@@ -64,7 +66,8 @@ async def get_items(user_id: int = Depends(get_current_user), db=Depends(get_db)
         items = [
             {
                 "id": row["id"],
-                "name": row["name"]
+                "name": row["name"],
+                "expires_at": row["expires_at"].isoformat() if row["expires_at"] else None
             }
             for row in rows
         ]

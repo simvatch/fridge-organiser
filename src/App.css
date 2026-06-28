@@ -1008,9 +1008,37 @@
 
 .reset-btn {
   font-size: 0.75rem;
+  font-family: "Comic Relief", system-ui, sans-serif;
   color: #999;
   background: none;
   border: none;
   cursor: pointer;
   text-decoration: underline;
+}
+
+.expiry-input {
+  border: 1px solid #ccc;
+  font-family: "Comic Relief", system-ui, sans-serif;
+  border-radius: 4px;
+  padding: 8px 4px;
+  font-size: 0.85rem;
+}
+
+.expiry-badge {
+  font-size: 0.72rem;
+  font-family: "Comic Relief", system-ui, sans-serif;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  font-weight: 600;
+}
+
+.expiry-badge.expired {
+  background: #fde8e8;
+  color: #c0392b;
+}
+
+.expiry-badge.expiring-soon {
+  background: #fff3cd;
+  color: #856404
 }
