@@ -873,7 +873,13 @@ export default function App() {
                     </form>
 
                     <div className="items">
-                      <div className="list-header">Shopping List:</div>
+                      <div className="list-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span>Shopping List:</span>
+                        
+                          {dismissedAutoItems.length > 0 && (
+                            <button onClick={() => setDismissedAutoItems([])} className='reset-btn'>Reset Shopping List</button>
+                          )}  
+                      </div>
                       <ul>
                         {[
                           ...shoppingList.map(item => ({ name: item.name, id: item.id, manual: true })),

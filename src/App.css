@@ -1005,3 +1005,12 @@
   color: #334155;
   border-color: #cbd5e1;
 }
+
+.reset-btn {
+  font-size: 0.75rem;
+  color: #999;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
