@@ -34,6 +34,9 @@ export default function App() {
   const [dismissedAutoItems, setDismissedAutoItems] = useState([])
   const [confirmDeleteAuto, setConfirmDeleteAuto] = useState(null)
   const [dontShowAgain, setDontShowAgain] = useState(false)
+  const [newShoppingQty, setNewShoppingQty] = useState(1)
+  const [expandedShoppingItem, setExpandedShoppingItem] = useState(null)
+  const [deleteShoppingAmount, setDeleteShoppingAmount] = useState({})
 
   useEffect(() => {
     checkAuth()
@@ -70,6 +73,7 @@ export default function App() {
         fetchHistory()
         fetchSettings()
         fetchDismissed()
+        fetchShoppingList()
       } else {
         setIsAuthenticated(false)
       }
@@ -444,19 +448,22 @@ export default function App() {
     
     if (!name) return
     try {
-      await fetch(
-        "https://fridge-organiser.onrender.com/shopping/add",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ name })
-        }
-      )
+      for (let i = 0; i < newShoppingQty; i++) {
+        await fetch(
+          "https://fridge-organiser.onrender.com/shopping/add",
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name })
+          }
+        )
+      }
 
       setNewShoppingItem("")
+      setNewShoppingQty(1)
       fetchShoppingList()
     } catch (error) {
       console.error("Shopping add error:", error)
@@ -506,7 +513,7 @@ export default function App() {
         )
         fetchDismissed()
       } catch (error) {
-        console.error("Dismiss error:", errorzs)
+        console.error("Dismiss error:", error)
       }
     }
     setConfirmDeleteAuto(null)
@@ -533,6 +540,7 @@ export default function App() {
     fetchItems()
     fetchHistory()
     fetchDismissed()
+    fetchShoppingList
   }
 
   const logoutUser = async () => {
@@ -899,7 +907,7 @@ export default function App() {
                         onChange={(e) => setNewShoppingItem(e.target.value)}
                         className="add-item-input"
                       />
-                      <button type="submit" className="add">Add Item</button>
+                      <button type="submit" className="add">Add</button>
                     </form>
 
                     <div className="items">
@@ -920,31 +928,50 @@ export default function App() {
                                 className='reset-btn'>Reset Shopping List</button>
                           )}  
                       </div>
-                      <ul>
-                        {[
-                          ...shoppingList.map(item => ({ name: item.name, id: item.id, manual: true })),
-                          ...needToBuy
-                            .filter(name =>
-                              !shoppingList.some(s => s.name === name) &&
-                              !dismissedAutoItems.includes(name)
-                            )
-                            .map(name => ({ name, id: null, manual: false }))
-                        ]
+                      {(() => {
+                        const groupedShopping = shoppingList.reduce((acc, item) => {
+                          const key = item.name.trim().toLowerCase()
+                          if (!acc[key]) acc[key] = { count: 0, ids: [], displayName: item.name }
+                          acc[key].count++
+                          acc[key].ids.push(item.id)
+                          return acc
+                        }, {})
+
+                        const manualItems = Object.entries(groupedShopping).map(([key, data]) => ({
+                          name: key,
+                          displayName: data.displayName,
+                          count: data.count,
+                          ids: data.ids,
+                          manual: true
+                        }))
+
+                        const autoItems = needToBuy
+                          .filter(name =>
+                            !Object.keys(groupedShopping).includes(name.toLowerCase()) &&
+                            !dismissedAutoItems.includes(name)
+                          )
+                          .map(name => ({ name, displayName: name, count: 1, ids: [], manual: false }))
+
+                        return [...manualItems, ...autoItems]
                           .sort((a, b) => a.name.localeCompare(b.name))
                           .map((item, index) => (
                             <li key={index} className="item-row-wrapper">
                               <div className="item-row">
                                 <span>
-                                  {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
-                                  {!item.manual && (
-                                    <span className='auto-badge'>auto</span>
-                                  )}
+                                  {item.displayName.charAt(0).toUpperCase() + item.displayName.slice(1)}
+                                  {item.count > 1 && <span className="item-count">x{item.count}</span>}
+                                  {!item.manual && <span className="auto-badge">auto</span>}
                                 </span>
                                 <button
                                   className="delete-btn"
                                   onClick={() => {
                                     if (item.manual) {
-                                      deleteShoppingItem(item.id)
+                                      if (item.count === 1) {
+                                        deleteShoppingItem(item.ids[0])
+                                      } else {
+                                        setExpandedShoppingItem(expandedShoppingItem === item.name ? null : item.name)
+                                        setDeleteShoppingAmount(prev => ({ ...prev, [item.name]: 1 }))
+                                      }
                                     } else {
                                       setConfirmDeleteAuto(item.name)
                                       setDontShowAgain(false)
@@ -960,36 +987,51 @@ export default function App() {
                                 </button>
                               </div>
 
+                              {item.manual && expandedShoppingItem === item.name && (
+                                <div className="delete-controls">
+                                  <button onClick={() => setDeleteShoppingAmount(prev => ({ ...prev, [item.name]: Math.max(1, (prev[item.name] || 1) - 1) }))}>-</button>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max={item.count}
+                                    value={deleteShoppingAmount[item.name] || ""}
+                                    onChange={(e) => {
+                                      const value = e.target.value
+                                      setDeleteShoppingAmount(prev => ({ ...prev, [item.name]: value === "" ? "" : Number(value) }))
+                                    }}
+                                  />
+                                  <button onClick={() => setDeleteShoppingAmount(prev => ({ ...prev, [item.name]: Math.min(item.count, (prev[item.name] || 1) + 1) }))}>+</button>
+                                  <button
+                                    className="confirm-delete"
+                                    disabled={deleteShoppingAmount[item.name] === "" || deleteShoppingAmount[item.name] < 1}
+                                    onClick={async () => {
+                                      const idsToDelete = item.ids.slice(0, deleteShoppingAmount[item.name] || 1)
+                                      for (const id of idsToDelete) {
+                                        await fetch(`https://fridge-organiser.onrender.com/shopping/${id}`, { method: "DELETE", credentials: "include" })
+                                      }
+                                      setExpandedShoppingItem(null)
+                                      fetchShoppingList()
+                                    }}
+                                  >Delete</button>
+                                </div>
+                              )}
+
                               {confirmDeleteAuto === item.name && (
                                 <div className="auto-delete-panel">
                                   <span className="auto-delete-title">Remove from list?</span>
                                   <label className="auto-delete-checkbox-label">
-                                    <input
-                                      type="checkbox"
-                                      checked={dontShowAgain}
-                                      onChange={(e) => setDontShowAgain(e.target.checked)}
-                                    />
+                                    <input type="checkbox" checked={dontShowAgain} onChange={(e) => setDontShowAgain(e.target.checked)} />
                                     Don't show this item again
                                   </label>
                                   <div className="auto-delete-actions">
-                                    <button className="auto-delete-btn-confirm" onClick={confirmAutoDelete}>
-                                      Confirm
-                                    </button>
-                                    <button 
-                                      className="auto-delete-btn-cancel"
-                                      onClick={() => { 
-                                        setConfirmDeleteAuto(null); 
-                                        setDontShowAgain(false);
-                                      }}
-                                    >
-                                      Cancel
-                                    </button>
+                                    <button className="auto-delete-btn-confirm" onClick={confirmAutoDelete}>Confirm</button>
+                                    <button className="auto-delete-btn-cancel" onClick={() => { setConfirmDeleteAuto(null); setDontShowAgain(false) }}>Cancel</button>
                                   </div>
                                 </div>
                               )}
                             </li>
-                          ))}
-                      </ul>
+                          ))
+                      })()}
                     </div>
                   </>
                 )}
