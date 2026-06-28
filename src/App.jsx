@@ -69,6 +69,7 @@ export default function App() {
         fetchItems()
         fetchHistory()
         fetchSettings()
+        fetchDismissed()
       } else {
         setIsAuthenticated(false)
       }
@@ -531,6 +532,7 @@ export default function App() {
     setIsAuthenticated(true)
     fetchItems()
     fetchHistory()
+    fetchDismissed()
   }
 
   const logoutUser = async () => {
