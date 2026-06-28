@@ -56,7 +56,7 @@ async def get_items(user_id: int = Depends(get_current_user), db=Depends(get_db)
     try:
         rows = await db.fetch(
             """
-            SELECT id, name
+            SELECT id, name, expires_at
             FROM items
             WHERE user_id = $1
             ORDER BY created_at DESC
