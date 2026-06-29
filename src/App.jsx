@@ -187,7 +187,7 @@ export default function App() {
 
     if (diffDays < 0) return "Expired"
     if (diffDays === 0) return "Expires today"
-    return `Expires ${expiry.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`
+    return `Expires ${expiry.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`
   }
 
   const detectItemsFromImage = async () => {
