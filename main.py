@@ -162,7 +162,7 @@ async def get_recipes(request: FridgeRequest):
             }
         ],
         "temperature": 0.7,
-        "max_tokens": 2000
+        "max_tokens": 8000
     })
 
     return {"content": result["choices"][0]["message"]["content"]}
@@ -249,7 +249,7 @@ async def detect_items(file: UploadFile = File(...)):
             }
         ],
         "temperature": 0.1,
-        "max_tokens": 8000
+        "max_tokens": 2000
     })
 
     try:
