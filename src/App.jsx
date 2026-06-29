@@ -1014,14 +1014,21 @@ export default function App() {
                           manual: true
                         }))
 
-                        const autoItems = needToBuy
+                        const autoNames = new Set(needToBuy.map(n => n.toLowerCase()))
+
+                        const mergedManualItems = manualItems.map(item => ({
+                          ...item,
+                          count: autoNames.has(item.name.toLowerCase()) ? item.count + 1 : item.count
+                        }))
+
+                        const autoItems = [...new Set(needToBuy)]
                           .filter(name =>
-                            !Object.keys(groupedShopping).includes(name.toLowerCase()) &&
+                            !Object.keys(groupedShopping).some(k => k === name.toLowerCase()) &&
                             !dismissedAutoItems.includes(name)
                           )
                           .map(name => ({ name, displayName: name, count: 1, ids: [], manual: false }))
 
-                        return [...manualItems, ...autoItems]
+                        return [...mergedManualItems, ...autoItems]
                           .sort((a, b) => a.name.localeCompare(b.name))
                           .map((item, index) => (
                             <li key={index} className="item-row-wrapper">
