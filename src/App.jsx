@@ -151,6 +151,31 @@ export default function App() {
     }
   }
 
+  const getExpiryAlert = (expiresAt) => {
+    if (!expiresAt) return null
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const [year,  month, day] = expiresAt.split("-").map(Number)
+    const expiry = new Date(year, month - 1, day)
+    const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24))
+
+    if (diffDays < 0) return (
+      <svg className="expiry-alert expired-alert" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    )
+    if (diffDays <= 3) return (
+      <svg className="expiry-alert expiring-alert" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    )
+    return null
+  }
+
   const getExpiryBadge = (expiresAt) => {
     if (!expiresAt) return null
     const today = new Date()
@@ -160,10 +185,9 @@ export default function App() {
     const expiry = new Date(year, month -1, day)
     const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24))
 
-    if (diffDays < 0) return <span className="expiry-badge expired">❌ Expired</span>
-    if (diffDays === 0) return <span className="expiry-badge expiring-soon">⚠️ Today</span>
-    if (diffDays <= 3) return <span className="expiry-badge expiring-soon">⚠️ {diffDays}d</span>
-    return null
+    if (diffDays < 0) return "Expired"
+    if (diffDays === 0) return "Expires today"
+    return `Expires ${expiry.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`
   }
 
   const detectItemsFromImage = async () => {
@@ -689,6 +713,7 @@ export default function App() {
                         value={newItemExpiry}
                         onChange={(e) => setNewItemExpiry(e.target.value)}
                         className='expiry-input'
+                        placeholder="Expiry Date"
                       />
                       <button type="submit" className='add'>Add Item</button>
                     </form>
@@ -740,15 +765,20 @@ export default function App() {
                           <li key={name} className='item-row-wrapper'>
                             <div key={name} className="item-row">
 
-                              <span>
-                                {data.displayName}
-                                {data.count > 1 && (
-                                  <span className="item-count">
-                                    x{data.count}
-                                  </span>
+                              <div style={{ display:"flex", flexDirection: "column", gap: "2px" }}>
+                                <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                                  {data.displayName}
+                                  {data.count > 1 && (
+                                    <span className="item-count">
+                                      x{data.count}
+                                    </span>
+                                  )}
+                                  {getExpiryAlert(data.expires_at)}
+                                </span>
+                                {data.expires_at && (
+                                  <span className='expiry-date-text'>{getExpiryBadge(data.expires_at)}</span>
                                 )}
-                                {getExpiryBadge(data.expires_at)}
-                              </span>
+                              </div>
 
                               <button
                                 onClick={() => {
@@ -1132,7 +1162,6 @@ export default function App() {
                               <label style={{ fontSize: "0.8rem", color: "#666", whiteSpace: "nowrap" }}>Expiry:</label>
                               <input
                                 type="date"
-                                className="expiry-input"
                                 value={item.expires_at || ""}
                                 style={{ flex: 1, fontSize: "0.8rem" }}
                                 onChange={(e) => {
@@ -1141,6 +1170,8 @@ export default function App() {
                                   )
                                   setDetectedItems(updated)
                                 }}
+                                className="expiry-input"
+                                style={{ width: "100%", maxWidth: "160px" }}
                               />
                             </div>
                           </div>
