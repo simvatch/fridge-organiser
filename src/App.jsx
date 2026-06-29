@@ -122,25 +122,25 @@ export default function App() {
     const itemToSubmit = newItemName.trim()
     if(!itemToSubmit) return
 
+    const names = itemToSubmit.split(",").map(n => n.trim()).filter(n => n.length > 0)
+
     try {
-      const response = await fetch(
-        'https://fridge-organiser.onrender.com/items/add',
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            name: itemToSubmit,
-            expires_at: newItemExpiry || null
-          })
-        }
-      )
-
-      const data = await response.json()
-
-      console.log(data)
+      for (const name of names) {
+        await fetch(
+          'https://fridge-organiser.onrender.com/items/add',
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              name: itemToSubmit,
+              expires_at: newItemExpiry || null
+            })
+          }
+        )
+      }
 
       setNewItemName("")
       setNewItemExpiry("")
@@ -495,19 +495,23 @@ export default function App() {
     const name = newShoppingItem.trim()
     
     if (!name) return
+
+    const names = name.split(",").map(n => n.trim()).filter(n => n.length > 0)
     try {
-      for (let i = 0; i < newShoppingQty; i++) {
-        await fetch(
-          "https://fridge-organiser.onrender.com/shopping/add",
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ name })
-          }
-        )
+      for (const itemName of names) {
+        for (let i = 0; i < newShoppingQty; i++) {
+          await fetch(
+            "https://fridge-organiser.onrender.com/shopping/add",
+            {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ name: itemName })
+            }
+          )
+        }
       }
 
       setNewShoppingItem("")
