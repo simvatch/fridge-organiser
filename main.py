@@ -116,9 +116,9 @@ async def get_recipes(request: FridgeRequest, user=Depends(get_current_user), db
         restrictions = settings["dietary_restrictions"] or []
         diets = settings["diets"] or []
         if restrictions:
-            dietary_text += f"/n -Must be: {', '.join(restrictions)}"
+            dietary_text += f"\n -Must be: {', '.join(restrictions)}"
         if diets:
-            dietary_text += f"/n -Must follow: {', '.join(diets)} diet(s)"
+            dietary_text += f"\n -Must follow: {', '.join(diets)} diet(s)"
 
     ingredients = ",".join(request.ingredients)
     prompt = f"""
