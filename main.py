@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import ORJSONResponse
@@ -19,6 +19,7 @@ from backend.database import connect_db, disconnect_db
 from backend.items import router as item_router
 from backend.settings import router as settings_router
 from backend.shopping import router as shopping_router
+from backend.auth import get_current_user, get_db
 
 load_dotenv()
 
@@ -99,7 +100,25 @@ def home():
     return {"status": "online"}
 
 @app.post("/recipes")
-async def get_recipes(request: FridgeRequest):
+async def get_recipes(request: FridgeRequest, user=Depends(get_current_user), db=Depends(get_db)):
+
+    settings = await db.fetchrow(
+        """
+        SELECT dietary_restrictions, diets
+        FROM settings
+        WHERE user_id = $1
+        """,
+        user
+    )
+
+    dietary_text = ""
+    if settings: 
+        restrictions = settings["dietary_restritctions"] or []
+        diets = settings["diets"] or []
+        if restrictions:
+            dietary_text += f"/n -Must be: {', '.join(restrictions)}"
+        if diets:
+            dietary_text += f"/n -Must follow: {', '.join(diets)} diet(s)"
 
     ingredients = ",".join(request.ingredients)
     prompt = f"""
@@ -120,6 +139,7 @@ async def get_recipes(request: FridgeRequest):
     - Temperatures must be Celsius
     - Weight must be grams
     - Volume must be millilitres
+    - {dietary_text}
     - return ONLY JSON
 
     Format:

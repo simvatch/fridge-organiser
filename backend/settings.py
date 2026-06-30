@@ -12,6 +12,8 @@ class SettingsModel(BaseModel):
     temperature: str
     weight: str
     volume: str
+    dietry_restrictions: list[str] = []
+    diets: list[str] = []
 
 @router.get("")
 async def get_settings(user=Depends(get_current_user), db=Depends(get_db)):
@@ -32,7 +34,9 @@ async def get_settings(user=Depends(get_current_user), db=Depends(get_db)):
                 user_id,
                 temperature,
                 weight,
-                volume
+                volume,
+                dietry_restrictions,
+                diets
             )
             VALUES ($1, 'celsius', 'grams', 'ml')
             """,
@@ -59,7 +63,9 @@ async def save_settings(settings: SettingsModel, user=Depends(get_current_user),
             user_id,
             temperature,
             weight,
-            volume
+            volume,
+            dietry_restrictions,
+            diets
         )
         VALUES ($1, $2, $3, $4)
         ON CONFLICT (user_id)
@@ -67,11 +73,15 @@ async def save_settings(settings: SettingsModel, user=Depends(get_current_user),
             temperature = EXCLUDED.temperature,
             weight = EXCLUDED.weight,
             volume = EXCLUDED.volume
+            dietry_restrictions = EXLCUDED.dietry_restrictions
+            diets = EXCLUDED.diets
         """,
         user,
         settings.temperature,
         settings.weight,
-        settings.volume
+        settings.volume,
+        settings.dietry_restrictions,
+        settings.diets
     )
 
     return {"success": True}

@@ -1,12 +1,34 @@
 import { useState, useEffect } from "react";
 import "./Settings.css"
 
+const DIETRY_RESTRICTIONS = [
+    { value: "gluten-free", label: "Gluten Free" },
+    { value: "dairy-free", label: "Dairy Free" },
+    { value: "nut-free", label: "Nut Free" },
+    { value: "egg-free", label: "Egg Free" },
+    { value: "soy-free", label: "Soy Free" },
+    { value: "shellfish-free", label: "Shellfish Free" }
+]
+
+const DIETS = [
+    { value: "keto", label: "Keto" },
+    { value: "low-carb", label: "Low Carb" },
+    { value: "paleo", label: "Paleo" },
+    { value: "vegetarian", label: "Vegetarian" },
+    { value: "vegan", label: "Vegan" },
+    { value: "pescatarian", label: "Pescatarian" },
+    { value: "halal", label: "Halal" },
+    { value: "kosher", label: "Kosher" }
+]
+
 export default function Settings({ isOpen, onClose, settings, setSettings }) {
     const [localSettings, setLocalSettings] = useState(
     settings || {
         temperature: "celsius",
         weight: "grams",
-        volume: "ml"
+        volume: "ml",
+        dietary_restrictions: [],
+        diets: []
     }
 )
 
@@ -29,12 +51,16 @@ export default function Settings({ isOpen, onClose, settings, setSettings }) {
                 setSettings({
                     temperature: data.temperature,
                     weight: data.weight,
-                    volume: data.volume
+                    volume: data.volume,
+                    dietary_restrictions: data.dietary_restrictions || [],
+                    diets: data.diets || []
                 })
                 setLocalSettings({
                     temperature: data.temperature,
                     weight: data.weight,
-                    volume: data.volume
+                    volume: data.volume,
+                    dietary_restrictions: data.dietary_restrictions || [],
+                    diets: data.diets || []
                 })
             } catch (error) {
                 console.error(error)
@@ -51,6 +77,18 @@ export default function Settings({ isOpen, onClose, settings, setSettings }) {
             ...prev,
             [key]: value
         }))
+    }
+
+    const toggleMultiSelect = (key, value) => {
+        setLocalSettings(prev => {
+            const current = prev[key] || []
+            const updated = current.includes(value) ? current.filter(v => v !== value) : [...current, value]
+            
+            return {
+                ...prev,
+                [key]: updated
+            }
+        })
     }
 
     const handleSave = async () => {
@@ -165,6 +203,42 @@ export default function Settings({ isOpen, onClose, settings, setSettings }) {
                         <option value="litres">Litres (l)</option>
                         <option value="cups">Cups</option>
                     </select>
+                </div>
+
+                <div className="settings-group">
+                    <label>Dietary Requirements</label>
+
+                    <div className="multiselect-box">
+                        {DIETRY_RESTRICTIONS.map(({ value, label }) => (
+
+                            <label key={value} className="multiselect-option">
+                                <input
+                                    type="checkbox"
+                                    checked={(localSettings.dietary_restrictions || []).includes(value)}
+                                    onChange={() => toggleMultiSelect("dietary_restrictions", value)}
+                                />
+                                {label}
+                            </label>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="settings-group">
+                    <label>Diets</label>
+
+                    <div className="multiselect-box">
+                        {DIETS.map(({ value, label }) => (
+                            
+                            <label key={value} className="multiselect-option">
+                                <input
+                                    type="checkbox"
+                                    checked={(localSettings.diets || []).includes(value)}
+                                    onChange={() => toggleMultiSelect("diets", value)}
+                                />
+                                {label}
+                            </label>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="settings-actions">
