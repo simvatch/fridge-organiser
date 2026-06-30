@@ -12,7 +12,7 @@ class SettingsModel(BaseModel):
     temperature: str
     weight: str
     volume: str
-    dietry_restrictions: list[str] = []
+    dietary_restrictions: list[str] = []
     diets: list[str] = []
 
 @router.get("")
@@ -67,13 +67,13 @@ async def save_settings(settings: SettingsModel, user=Depends(get_current_user),
             dietry_restrictions,
             diets
         )
-        VALUES ($1, $2, $3, $4)
+        VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (user_id)
         DO UPDATE SET
             temperature = EXCLUDED.temperature,
             weight = EXCLUDED.weight,
             volume = EXCLUDED.volume
-            dietry_restrictions = EXLCUDED.dietry_restrictions
+            dietry_restrictions = EXCLUDED.dietry_restrictions
             diets = EXCLUDED.diets
         """,
         user,
