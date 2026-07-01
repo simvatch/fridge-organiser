@@ -1132,6 +1132,7 @@
 .slider-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.75rem;
+  font-size: 0.70rem;
   color: #999;
+  font-family: "Comic Relief", system-ui, sans-serif;
 }

@@ -340,7 +340,11 @@ export default function App() {
         method: 'POST',
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ingredients: items.map(item => item.name) })
+        body: JSON.stringify({ 
+          ingredients: items.map(item => item.name),
+          max_cook_time: cookTime,
+          servingSize: servings
+        })
       })
       const data = await response.json()
 
