@@ -343,7 +343,7 @@ export default function App() {
         body: JSON.stringify({ 
           ingredients: items.map(item => item.name),
           max_cook_time: cookTime,
-          servingSize: servings
+          serving_size: servings
         })
       })
       const data = await response.json()

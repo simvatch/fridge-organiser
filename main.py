@@ -168,7 +168,7 @@ async def get_recipes(request: FridgeRequest, user=Depends(get_current_user), db
         ],
         "missingIngredients": [],
         "cookTime": "",
-        "totalCarbs": 0;
+        "totalCarbs": 0,
         "temperature": {{
             "value": 0,
             "unit": "C"
