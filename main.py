@@ -139,6 +139,7 @@ async def get_recipes(request: FridgeRequest, user=Depends(get_current_user), db
     - Temperatures must be Celsius
     - Weight must be grams
     - Volume must be millilitres
+    - include estimated total carbs in grams as an integer
     - {dietary_text}
     - return ONLY JSON
 
@@ -163,6 +164,7 @@ async def get_recipes(request: FridgeRequest, user=Depends(get_current_user), db
         ],
         "missingIngredients": [],
         "cookTime": "",
+        "totalCarbs": 0;
         "temperature": {{
             "value": 0,
             "unit": "C"

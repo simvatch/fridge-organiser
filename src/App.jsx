@@ -920,6 +920,9 @@ export default function App() {
                               <span>
                                 👪 Serves: {recipe.servings || "Not specified"}
                               </span>
+                              {recipe.totalCarbs} !=== undefined && (
+                                <span>🌾 Carbs: {recipe.totalCarbs}g</span>
+                              )
                             </div>
 
                             <div className="section">
