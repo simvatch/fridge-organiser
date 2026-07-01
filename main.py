@@ -63,7 +63,7 @@ client = httpx.AsyncClient(
     http2=True,
     timeout=httpx.Timeout(
         connect=5.0,
-        read=30.0,
+        read=60.0,
         write=30.0,
         pool=5.0
     ),
@@ -182,7 +182,7 @@ async def get_recipes(request: FridgeRequest, user=Depends(get_current_user), db
             }
         ],
         "temperature": 0.7,
-        "max_tokens": 8000
+        "max_tokens": 4000
     })
 
     return {"content": result["choices"][0]["message"]["content"]}
