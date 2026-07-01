@@ -39,6 +39,8 @@ export default function App() {
   const [deleteShoppingAmount, setDeleteShoppingAmount] = useState({})
   const [newItemExpiry, setNewItemExpiry] = useState("")
   const [addingItems, setAddingItems] = useState(false)
+  const [maxCookTime, setMaxCookTime] = useState(30)
+  const [servingSize, setServingSize] = useState(2)
 
   useEffect(() => {
     checkAuth()
@@ -56,7 +58,7 @@ export default function App() {
 
   useEffect (() => {
     if (isAuthenticated && items.length > 0 && !recipesLoading && recipes.length === 0) {
-      generateRecipes()
+      generateRecipes(maxCookTime, servingSize)
     }
   }, [items, isAuthenticated])
 
@@ -331,7 +333,7 @@ export default function App() {
     }
   }
 
-  const generateRecipes = async () => {
+  const generateRecipes = async (cookTime = maxCookTime, servings = servingSize) => {
     setRecipesLoading(true)
     try {
       const response = await fetch('https://fridge-organiser.onrender.com/recipes', {
@@ -883,8 +885,45 @@ export default function App() {
 
                 {activeTab === "recipes" && (
                   <>
+                    <div className='recipe-filters'>
+                      <div className='filter-group'>
+                        <label>Max Cook Time: <strong>{maxCookTime} mins</strong></label>
+                        <input
+                          type="range"
+                          min={10}
+                          max={120}
+                          step={5}
+                          value={maxCookTime}
+                          onChange={(e) => setMaxCookTime(Number(e.target.value))}
+                          className='filter-slider'
+                        />
+
+                        <div className='slider-labels'>
+                          <span>10 mins</span>
+                          <span> 120 mins</span>
+                        </div>
+                      </div>
+
+                      <div className='filter-group'>
+                        <label>Serving Size: <strong>{servingSize} {servingSize === 1 ? "person" : "people"}</strong></label>
+                        <input
+                          type="range"
+                          min={1}
+                          max={8}
+                          step={1}
+                          value={servingSize}
+                          onChange={(e) => setServingSize(Number(e.target.value))}
+                          className='filter-slider'
+                        />
+                        <div className='slider-labels'>
+                          <span>1</span>
+                          <span>8</span>
+                        </div>
+                      </div>
+                    </div>
+
                     <button
-                      onClick={generateRecipes}
+                      onClick={() => generateRecipes(maxCookTime, servingSize)}
                       className="add"
                       disabled={recipesLoading}
                     >

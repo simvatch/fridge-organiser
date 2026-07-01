@@ -75,6 +75,8 @@ client = httpx.AsyncClient(
 
 class FridgeRequest(BaseModel):
     ingredients: list[str]
+    max_cook_time: int = 30
+    serving_size: int = 2
 
 async def call_gemini(payload: dict, retries: int = 2):
     for attempt in range(retries + 1):
@@ -140,6 +142,8 @@ async def get_recipes(request: FridgeRequest, user=Depends(get_current_user), db
     - Weight must be grams
     - Volume must be millilitres
     - include estimated total carbs in grams as an integer
+    - Each recipe must take {request.max_cook_time} minutes or less
+    - Each recipe must serve exactly {request.serving_size} people
     - {dietary_text}
     - return ONLY JSON
 

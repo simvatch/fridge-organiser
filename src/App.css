@@ -1098,3 +1098,40 @@
   padding-left: 2px;
   text-transform: none;
 }
+
+.recipe-filters {
+  display: flex;
+  gap: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-group label {
+  font-size: 0.9rem;
+  font-family: "Comic Relief", system-ui, sans-serif;
+  color: #444;
+}
+
+.filter-slider {
+  width: 100%;
+  accent-color: #00195f;
+  cursor: pointer;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #999;
+}
