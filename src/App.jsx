@@ -41,6 +41,8 @@ export default function App() {
   const [addingItems, setAddingItems] = useState(false)
   const [maxCookTime, setMaxCookTime] = useState(30)
   const [servingSize, setServingSize] = useState(2)
+  const [sortBy, setSortBy] = useState("name")
+  const [showSortMenu, setShowSortMenu] = useState(false)
 
   useEffect(() => {
     checkAuth()
@@ -613,6 +615,22 @@ export default function App() {
     setIsAuthenticated(false)
   }
 
+  const sortedGroupedItems = (entries) => {
+    return entries.sort(([, a], [, b]) => {
+      if (sortBy === "name") return a.displayName.localeCompare(b.displayName)
+
+      if (sortBy === "expiry") {
+        if (!a.expires_at && !b.expires_at) return 0
+        if (!a.expires_at) return 1
+        if (!b.expires_at) return -1
+        return new Date(a.expires_at) - new Date(b.expires_at)
+      }
+
+      if (sortBy === "date_added") return new Date(a.created_at) - new Date(b.created_at)
+      return 0
+    })
+  }
+
   const groupedItems = items.reduce((acc, item) => {
     const name = item.name.trim().toLowerCase()
 
@@ -621,7 +639,8 @@ export default function App() {
         count: 0,
         ids: [],
         displayName: item.name,
-        expires_at: item.expires_at
+        expires_at: item.expires_at,
+        created_at: item.created_at
       }
     } else if (!acc[name].expires_at && item.expires_at) {
       acc[name].expires_at = item.expires_at
@@ -769,9 +788,56 @@ export default function App() {
                     </div>
 
                     <div className='items'> 
-                      <div className="list-header">Current Stock:</div>
+                      <div className="list-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span>Current Stock:</span>
+                        <div style={{ position: "relative" }}>
+                          <button className='sort-btn' onClick={() => setShowSortMenu(prev => !prev)}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                style={{ display: "block" }}
+                              >
+                                <line x1="4" y1="6" x2="20" y2="6"/>
+                                <line x1="4" y1="12" x2="14" y2="12"/>
+                                <line x1="4" y1="18" x2="8" y2="18"/>
+                              </svg>
+                            </button>
+
+                            {showSortMenu && (
+                              <div className='sort-menu'>
+                                {[
+                                  { value: "name", label: "Name" },
+                                  { value: "expiry", label: "Expiry Date" },
+                                  { value: "date_added", label: "Date Added" }
+                                ].map(({ value, label }) => (
+                                  <label key={value} className='sort-option'>
+                                    <input
+                                      type="radio"
+                                      name="sort"
+                                      checked={sortBy === value}
+                                      onChange={() => {
+                                        setSortBy(value)
+                                        setShowSortMenu(false)
+                                      }}
+                                    />
+                                    {label}
+                                  </label>
+                                ))}
+                              </div>
+                            )}
+                        </div>
+                      </div>
+                      
                       <ul>
-                        {Object.entries(groupedItems).sort(([, a], [, b]) => a.displayName.localeCompare(b.displayName)).map(([name, data]) => (
+                        {sortedGroupedItems(Object.entries(groupedItems)).map(([name, data]) => (
                           <li key={name} className='item-row-wrapper'>
                             <div key={name} className="item-row">
 
