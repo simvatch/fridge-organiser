@@ -1018,7 +1018,7 @@ export default function App() {
                   <>
 
                     {favourites.length > 0 && (
-                      <div style={{ width: "100%", maxWidth: "1200px", marginBottom: "20px" }}>
+                      <div style={{ width: "100%", marginBottom: "20px" }}>
                         <button
                           onClick={() => setShowFavourites(prev => !prev)}
                           className='sort-btn'
@@ -1041,7 +1041,7 @@ export default function App() {
                         </button>
 
                         {showFavourites && (
-                          <div className='recipes-container' style={{ marginTop: "16px" }}>
+                          <div className='recipes-container'>
                             {favourites.map((recipe, index) => {
                               const isFav = favourites.some(f => f.name === recipe.name);
                               return (
