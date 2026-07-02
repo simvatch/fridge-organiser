@@ -19,6 +19,7 @@ from backend.database import connect_db, disconnect_db
 from backend.items import router as item_router
 from backend.settings import router as settings_router
 from backend.shopping import router as shopping_router
+from backend.favourites import router as favourites_router
 from backend.auth import get_current_user, get_db
 
 load_dotenv()
@@ -58,6 +59,7 @@ app.include_router(auth_router)
 app.include_router(item_router)
 app.include_router(settings_router)
 app.include_router(shopping_router)
+app.include_router(favourites_router)
 
 client = httpx.AsyncClient(
     http2=True,

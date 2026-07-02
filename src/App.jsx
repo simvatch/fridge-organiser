@@ -43,6 +43,7 @@ export default function App() {
   const [servingSize, setServingSize] = useState(2)
   const [sortBy, setSortBy] = useState("name")
   const [showSortMenu, setShowSortMenu] = useState(false)
+  const [favourites, setFavourites] = useState([])
 
   useEffect(() => {
     checkAuth()
@@ -80,6 +81,7 @@ export default function App() {
         fetchSettings()
         fetchDismissed()
         fetchShoppingList()
+        fetchFavourites()
       } else {
         setIsAuthenticated(false)
       }
@@ -602,6 +604,7 @@ export default function App() {
     fetchHistory()
     fetchDismissed()
     fetchShoppingList()
+    fetchFavourites()
   }
 
   const logoutUser = async () => {
@@ -651,6 +654,47 @@ export default function App() {
 
     return acc
   }, {})
+
+  const fetchFavourites = async () => {
+    try {
+      const res = await fetch(
+        "https://fridge-organiser.onrender.com/favourites",
+        {
+          credentials: "include"
+        }
+      )
+
+      const data = await res.json()
+      setFavourites(data.favourites || [])
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const toggleFavourite = async (recipe, index) => {
+    const existing  =favourites.find(f => name === recipe.name)
+
+    if (existing) { 
+      await fetch(
+        `https://fridge-organiser.onrender.com/favourites/${existing.id}`,
+        {
+          method: "DELETE",
+          credentials: "include"
+        }
+      )
+    } else {
+      await fetch(
+        "https://fridge-organiser.onrender.com/favourites",
+        {
+          method: "POST",
+          credentials: "include",
+          header: { "Content-Type": "application/json" },
+          body: JSON.stringify(recipe)
+        }
+      )
+    }
+    fetchFavourites()
+  }
 
   if (isAuthenticated === null) {
     return <div>Loading...</div>
@@ -1011,7 +1055,29 @@ export default function App() {
                       <div className="recipes-container">
                         {recipes.map((recipe, index) => (
                           <div className="recipe-card" key={index}>
-                            <h2>{recipe.name}</h2>
+                            <div className='recipe-card-header'>
+                              <h2>{recipe.name}</h2>
+
+                              <button
+                                onClick={() => toggleFavourite(recipe, index)}
+                                className={`favourite-btn ${isFav ? 'is-active' : ''}`}
+                                aria-label='Add to favourites'
+                              >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="22"
+                                    height="22"
+                                    viewBox="0 0 24 24"
+                                    fill={isFav ? "#d9534f" : "none"}
+                                    stroke="#d9534f"
+                                    strokeWidth="2.2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                              </button>
+                            </div>
 
                             <div className="image-container">
                               {images[index] ? (
