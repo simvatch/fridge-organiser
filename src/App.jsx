@@ -44,6 +44,7 @@ export default function App() {
   const [sortBy, setSortBy] = useState("name")
   const [showSortMenu, setShowSortMenu] = useState(false)
   const [favourites, setFavourites] = useState([])
+  const [showFavourites, setShowFavourites] = useState(false)
 
   useEffect(() => {
     checkAuth()
@@ -194,6 +195,19 @@ export default function App() {
     if (diffDays < 0) return "Expired"
     if (diffDays === 0) return "Expires today"
     return `Expires ${expiry.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`
+  }
+
+  const getFavouriteMissingIngredients = (recipe) => {
+    return (recipe.ingredients || []).filter((ing) => {
+      const ingredientName = ing.name.toLowerCase()
+
+      const fridgeMatch = Object.keys(groupedItems).find(name =>
+          name.includes(ingredientName) ||
+          ingredientName.includes(name)
+      )
+
+      return !fridgeMatch
+    })
   }
 
   const detectItemsFromImage = async () => {
@@ -360,7 +374,10 @@ export default function App() {
         cleaned = cleaned
           .replace(/```json/g, "")
           .replace(/```/g, "")
+          .trim()
       }
+
+      cleaned = cleaned.replace(/[^\x00-\x7F]/g, "")
 
       const parsed = JSON.parse(cleaned)
 
@@ -1002,28 +1019,105 @@ export default function App() {
 
                     {favourites.length > 0 && (
                       <div style={{ width: "100%", maxWidth: "1200px", marginBottom: "20px" }}>
-                        <div className='list-header'>❤️ Saved Recipes</div>
-                        <div className='recipes-container'>
-                          {favourites.map((recipe, index) => (
-                            <div className='recipe-card' key={recipe.id}>
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                                <h2>{recipe.name}</h2>
+                        <button
+                          onClick={() => setShowFavourites(prev => !prev)}
+                          className='sort-btn'
+                          style={{ 
+                            marginBottom: showFavourites ? "16px" : "0", 
+                            display: "flex", 
+                            alignItems: "center", 
+                            gap: "8px",
+                            padding: "8px 16px",
+                            fontWeight: "6px",
+                            fontSize: "0.9rem"
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                            fill="#d9534f" stroke="#d9534f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                          </svg>
+                          <strong>Saved Recipes ({favourites.length})</strong>
+                          <span style={{ fontSize: "0.75rem", marginLeft: "4px" }}>{showFavourites ? "▲" : "▼"}</span>
+                        </button>
 
-                                <button
-                                  onClick={() => toggleFavourite(recipe)}
-                                  style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", flexShrink: 0 }}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                        fill="#d9534f" stroke="#d9534f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        {showFavourites && (
+                          <div className='recipes-container' style={{ marginTop: "16px" }}>
+                            {favourites.map((recipe, index) => {
+                              const isFav = favourites.some(f => f.name === recipe.name);
+                              return (
+                                <div className='recipe-card' key={recipe.id || index}>
+                                  <div className='recipe-card-header'>
+                                    <h2>{recipe.name}</h2>
+                                    <button
+                                      onClick={() => toggleFavourite(recipe)}
+                                      className={`favourite-btn ${isFav ? 'is-active' : ''}`}
+                                      aria-label='Remove from favourites'
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                                        fill={isFav ? "#d9534f" : "none"} stroke="#d9534f" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                                    </svg>
-                                </button>
-                              </div>
-                              <p>{recipe.description}</p>
-                              <div className='cook-time'><span>⏲️ {recipe.cookTime}</span></div>
-                            </div>
-                          ))}
-                        </div>
+                                      </svg>
+                                    </button>
+                                  </div>
+
+                                  <p>{recipe.description}</p>
+
+                                  <div className="recipe-meta">
+                                    <span>👪 Serves: {recipe.servings || "Not specified"}</span>
+                                    {recipe.totalCarbs !== undefined && (
+                                      <span>🌾 Carbs: {recipe.totalCarbs}g</span>
+                                    )}
+                                  </div>
+
+                                  <div className="section">
+                                    <h3>🧾 Ingredients</h3>
+                                    <ul className='ingredients-list'>
+                                      {(recipe.ingredients || []).map((ing, i) => (
+                                        <li key={i}>{ing.quantity} {ing.unit} {ing.name}</li>
+                                      ))}
+                                    </ul>
+                                    <h3>🍽️ Steps</h3>
+                                    <ol>
+                                      {(recipe.steps || []).map((step, stepIndex) => (
+                                        <li key={stepIndex}>{convertStepText(step, settings)}</li>
+                                      ))}
+                                    </ol>
+                                  </div>
+
+                                  <button className='add' onClick={() => openCookedModal(recipe)}>Mark as Cooked</button>
+
+                                  {(() => {
+                                    const missingIngredients = getFavouriteMissingIngredients(recipe)
+
+                                    return missingIngredients.length > 0 && (
+                                        <div className="section">
+                                            <h3>🛒 Missing Ingredients</h3>
+                                            <ul className="missing-list">
+                                                {missingIngredients.map((ingredient, i) => {
+                                                    const label =
+                                                        typeof ingredient === "string"
+                                                            ? ingredient
+                                                            : ingredient.name || ingredient.ingredient || JSON.stringify(ingredient)
+
+                                                    return (
+                                                        <li key={i}>
+                                                            {label.charAt(0).toUpperCase() + label.slice(1)}
+                                                        </li>
+                                                    )
+                                                })}
+                                            </ul>
+                                        </div>
+                                    )
+                                })()}
+
+                                  <div className="cook-time">
+                                    <span>⏲️ Cook Time: {recipe.cookTime || "Not specified"}</span>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -1031,29 +1125,19 @@ export default function App() {
                       <div className='filter-group'>
                         <label>Max Cook Time: <strong>{maxCookTime} mins</strong></label>
                         <input
-                          type="range"
-                          min={10}
-                          max={120}
-                          step={5}
-                          value={maxCookTime}
+                          type="range" min={10} max={120} step={5} value={maxCookTime}
                           onChange={(e) => setMaxCookTime(Number(e.target.value))}
                           className='filter-slider'
                         />
-
                         <div className='slider-labels'>
                           <span>10 mins</span>
-                          <span> 120 mins</span>
+                          <span>120 mins</span>
                         </div>
                       </div>
-
                       <div className='filter-group'>
                         <label>Serving Size: <strong>{servingSize} {servingSize === 1 ? "person" : "people"}</strong></label>
                         <input
-                          type="range"
-                          min={1}
-                          max={8}
-                          step={1}
-                          value={servingSize}
+                          type="range" min={1} max={8} step={1} value={servingSize}
                           onChange={(e) => setServingSize(Number(e.target.value))}
                           className='filter-slider'
                         />
@@ -1069,9 +1153,7 @@ export default function App() {
                       className="add"
                       disabled={recipesLoading}
                     >
-                      {recipesLoading
-                        ? "Generating New Recipes..."
-                        : "Generate New Recipes"}
+                      {recipesLoading ? "Generating New Recipes..." : "Generate New Recipes"}
                     </button>
 
                     {recipesLoading && recipes.length === 0 ? (
@@ -1082,82 +1164,80 @@ export default function App() {
                     ) : (
                       <div className="recipes-container">
                         {recipes.map((recipe, index) => {
-                            const isFav = favourites.some(f => f.name === recipe.name)
-                            return (
-                                <div className="recipe-card" key={index}>
-                                    <div className='recipe-card-header'>
-                                        <h2>{recipe.name}</h2>
-                                        <button
-                                            onClick={() => toggleFavourite(recipe, index)}
-                                            className={`favourite-btn ${isFav ? 'is-active' : ''}`}
-                                            aria-label='Add to favourites'
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
-                                                fill={isFav ? "#d9534f" : "none"} stroke="#d9534f" strokeWidth="2.2"
-                                                strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+                          const isFav = favourites.some(f => f.name === recipe.name)
+                          return (
+                            <div className="recipe-card" key={index}>
+                              <div className='recipe-card-header'>
+                                <h2>{recipe.name}</h2>
+                                <button
+                                  onClick={() => toggleFavourite(recipe, index)}
+                                  className={`favourite-btn ${isFav ? 'is-active' : ''}`}
+                                  aria-label='Add to favourites'
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                                    fill={isFav ? "#d9534f" : "none"} stroke="#d9534f" strokeWidth="2.2"
+                                    strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                  </svg>
+                                </button>
+                              </div>
 
-                                    <div className="image-container">
-                                        {images[index] ? (
-                                            <img src={images[index]} alt={recipe.name} />
-                                        ) : (
-                                            <div className='image-placeholder'>
-                                                <span>Generating preview...</span>
-                                            </div>
-                                        )}
-                                    </div>
+                              <div className="image-container">
+                                {images[index] ? (
+                                  <img src={images[index]} alt={recipe.name} />
+                                ) : (
+                                  <div className='image-placeholder'>
+                                    <span>Generating preview...</span>
+                                  </div>
+                                )}
+                              </div>
 
-                                    <p>{recipe.description}</p>
+                              <p>{recipe.description}</p>
 
-                                    <div className="recipe-meta">
-                                        <span>👪 Serves: {recipe.servings || "Not specified"}</span>
-                                        {recipe.totalCarbs !== undefined && (
-                                            <span>🌾 Carbs: {recipe.totalCarbs}g</span>
-                                        )}
-                                    </div>
+                              <div className="recipe-meta">
+                                <span>👪 Serves: {recipe.servings || "Not specified"}</span>
+                                {recipe.totalCarbs !== undefined && (
+                                  <span>🌾 Carbs: {recipe.totalCarbs}g</span>
+                                )}
+                              </div>
 
-                                    <div className="section">
-                                        <h3>🧾 Ingredients</h3>
-                                        <ul className='ingredients-list'>
-                                            {(recipe.ingredients || []).map((ing, i) => (
-                                                <li key={i}>{ing.quantity} {ing.unit} {ing.name}</li>
-                                            ))}
-                                        </ul>
-                                        <h3>🍽️ Steps</h3>
-                                        <ol>
-                                            {(recipe.steps || []).map((step, stepIndex) => (
-                                                <li key={stepIndex}>{convertStepText(step, settings)}</li>
-                                            ))}
-                                        </ol>
-                                    </div>
+                              <div className="section">
+                                <h3>🧾 Ingredients</h3>
+                                <ul className='ingredients-list'>
+                                  {(recipe.ingredients || []).map((ing, i) => (
+                                    <li key={i}>{ing.quantity} {ing.unit} {ing.name}</li>
+                                  ))}
+                                </ul>
+                                <h3>🍽️ Steps</h3>
+                                <ol>
+                                  {(recipe.steps || []).map((step, stepIndex) => (
+                                    <li key={stepIndex}>{convertStepText(step, settings)}</li>
+                                  ))}
+                                </ol>
+                              </div>
 
-                                    <button className='add' onClick={() => openCookedModal(recipe)}>Mark as Cooked</button>
+                              <button className='add' onClick={() => openCookedModal(recipe)}>Mark as Cooked</button>
 
-                                    {(recipe.missingIngredients || []).length > 0 && (
-                                        <div className="section">
-                                            <h3>🛒 Missing Ingredients</h3>
-                                            <ul className='missing-list'>
-                                                {recipe.missingIngredients.map((ingredient, i) => {
-                                                    const label = typeof ingredient === "string"
-                                                        ? ingredient
-                                                        : ingredient.name || ingredient.ingredient || JSON.stringify(ingredient)
-                                                    return (
-                                                        <li key={i}>{label.charAt(0).toUpperCase() + label.slice(1)}</li>
-                                                    )
-                                                })}
-                                            </ul>
-                                        </div>
-                                    )}
+                              {(recipe.missingIngredients || []).length > 0 && (
+                                <div className="section">
+                                  <h3>🛒 Missing Ingredients</h3>
+                                  <ul className='missing-list'>
+                                    {recipe.missingIngredients.map((ingredient, i) => {
+                                      const label = typeof ingredient === "string"
+                                        ? ingredient
+                                        : ingredient.name || ingredient.ingredient || JSON.stringify(ingredient)
+                                      return <li key={i}>{label.charAt(0).toUpperCase() + label.slice(1)}</li>
+                                    })}
+                                  </ul>
+                                </div>
+                              )}
 
-                                    <div className="cook-time">
-                                        <span>⏲️ Cook Time: {recipe.cookTime || "Not specified"}</span>
-                                    </div>
-                                </div>   
-                            )     
-                        })}           
+                              <div className="cook-time">
+                                <span>⏲️ Cook Time: {recipe.cookTime || "Not specified"}</span>
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
                     )}
                   </>
