@@ -1035,6 +1035,14 @@ export default function App() {
                             </div>
 
                             <div className="section">
+                              <h3>🧾 Ingredients</h3>
+                              <ul className='ingredients-list'>
+                                {(recipe.ingredients || []).map((ing, i) => (
+                                  <li key={i}>
+                                    {ing.quantity} {ing.unit} {ing.name}
+                                  </li>
+                                ))}
+                              </ul>
                               <h3>🍽️ Steps</h3>
                               <ol>
                                 {(recipe.steps || []).map((step, stepIndex) => (
@@ -1048,7 +1056,7 @@ export default function App() {
                             {(recipe.missingIngredients || []).length > 0 && (
                               <div className="section">
                                 <h3>🛒 Missing Ingredients</h3>
-                                <ul>
+                                <ul className='missing-list'>
                                   {recipe.missingIngredients.map((ingredient, i) => {
                                     const label = typeof ingredient === "string"
                                     ? ingredient

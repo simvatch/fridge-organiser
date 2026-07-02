@@ -197,11 +197,6 @@
   color: #333;
 }
 
-.section ul li {
-  color: #d9534f;
-  list-style-type: "❌ ";
-}
-
 .cook-time {
   margin-top: auto;
   padding-top: 15px;
@@ -1215,4 +1210,14 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+.ingredients-list li {
+  color: #333;
+  list-style-type: disc;
+}
+
+.missing-list li {
+  color: #d9534f;
+  list-style-type: "❌ ";
 }
