@@ -190,7 +190,7 @@ async def get_recipes(request: FridgeRequest, user=Depends(get_current_user), db
             }
         ],
         "temperature": 0.7,
-        "max_tokens": 4000
+        "max_tokens": 6000
     })
 
     return {"content": result["choices"][0]["message"]["content"]}

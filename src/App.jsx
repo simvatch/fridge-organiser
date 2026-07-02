@@ -672,7 +672,7 @@ export default function App() {
   }
 
   const toggleFavourite = async (recipe, index) => {
-    const existing  =favourites.find(f => name === recipe.name)
+    const existing  =favourites.find(f => f.name === recipe.name)
 
     if (existing) { 
       await fetch(
@@ -688,7 +688,7 @@ export default function App() {
         {
           method: "POST",
           credentials: "include",
-          header: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(recipe)
         }
       )
@@ -999,6 +999,34 @@ export default function App() {
 
                 {activeTab === "recipes" && (
                   <>
+
+                    {favourites.length > 0 && (
+                      <div style={{ width: "100%", maxWidth: "1200px", marginBottom: "20px" }}>
+                        <div className='list-header'>❤️ Saved Recipes</div>
+                        <div className='recipes-container'>
+                          {favourites.map((recipe, index) => (
+                            <div className='recipe-card' key={recipe.id}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                                <h2>{recipe.name}</h2>
+
+                                <button
+                                  onClick={() => toggleFavourite(recipe)}
+                                  style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", flexShrink: 0 }}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="#d9534f" stroke="#d9534f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                    </svg>
+                                </button>
+                              </div>
+                              <p>{recipe.description}</p>
+                              <div className='cook-time'><span>⏲️ {recipe.cookTime}</span></div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className='recipe-filters'>
                       <div className='filter-group'>
                         <label>Max Cook Time: <strong>{maxCookTime} mins</strong></label>
@@ -1053,97 +1081,83 @@ export default function App() {
                       </div>
                     ) : (
                       <div className="recipes-container">
-                        {recipes.map((recipe, index) => (
-                          <div className="recipe-card" key={index}>
-                            <div className='recipe-card-header'>
-                              <h2>{recipe.name}</h2>
+                        {recipes.map((recipe, index) => {
+                            const isFav = favourites.some(f => f.name === recipe.name)
+                            return (
+                                <div className="recipe-card" key={index}>
+                                    <div className='recipe-card-header'>
+                                        <h2>{recipe.name}</h2>
+                                        <button
+                                            onClick={() => toggleFavourite(recipe, index)}
+                                            className={`favourite-btn ${isFav ? 'is-active' : ''}`}
+                                            aria-label='Add to favourites'
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                                                fill={isFav ? "#d9534f" : "none"} stroke="#d9534f" strokeWidth="2.2"
+                                                strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
 
-                              <button
-                                onClick={() => toggleFavourite(recipe, index)}
-                                className={`favourite-btn ${isFav ? 'is-active' : ''}`}
-                                aria-label='Add to favourites'
-                              >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="22"
-                                    height="22"
-                                    viewBox="0 0 24 24"
-                                    fill={isFav ? "#d9534f" : "none"}
-                                    stroke="#d9534f"
-                                    strokeWidth="2.2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                                </svg>
-                              </button>
-                            </div>
+                                    <div className="image-container">
+                                        {images[index] ? (
+                                            <img src={images[index]} alt={recipe.name} />
+                                        ) : (
+                                            <div className='image-placeholder'>
+                                                <span>Generating preview...</span>
+                                            </div>
+                                        )}
+                                    </div>
 
-                            <div className="image-container">
-                              {images[index] ? (
-                                <img src={images[index]} alt={recipe.name} />
-                              ) : (
-                                <div className='image-placeholder'>
-                                  <span>Generating preview...</span>
-                                </div>
-                              )}
-                            </div>
+                                    <p>{recipe.description}</p>
 
-                            <p>{recipe.description}</p>
+                                    <div className="recipe-meta">
+                                        <span>👪 Serves: {recipe.servings || "Not specified"}</span>
+                                        {recipe.totalCarbs !== undefined && (
+                                            <span>🌾 Carbs: {recipe.totalCarbs}g</span>
+                                        )}
+                                    </div>
 
-                            <div className="recipe-meta">
-                              <span>
-                                👪 Serves: {recipe.servings || "Not specified"}
-                              </span>
-                              {recipe.totalCarbs !== undefined && (
-                                <span>🌾 Carbs: {recipe.totalCarbs}g</span>
-                              )}
-                            </div>
+                                    <div className="section">
+                                        <h3>🧾 Ingredients</h3>
+                                        <ul className='ingredients-list'>
+                                            {(recipe.ingredients || []).map((ing, i) => (
+                                                <li key={i}>{ing.quantity} {ing.unit} {ing.name}</li>
+                                            ))}
+                                        </ul>
+                                        <h3>🍽️ Steps</h3>
+                                        <ol>
+                                            {(recipe.steps || []).map((step, stepIndex) => (
+                                                <li key={stepIndex}>{convertStepText(step, settings)}</li>
+                                            ))}
+                                        </ol>
+                                    </div>
 
-                            <div className="section">
-                              <h3>🧾 Ingredients</h3>
-                              <ul className='ingredients-list'>
-                                {(recipe.ingredients || []).map((ing, i) => (
-                                  <li key={i}>
-                                    {ing.quantity} {ing.unit} {ing.name}
-                                  </li>
-                                ))}
-                              </ul>
-                              <h3>🍽️ Steps</h3>
-                              <ol>
-                                {(recipe.steps || []).map((step, stepIndex) => (
-                                  <li key={stepIndex}>{convertStepText(step, settings)}</li>
-                                ))}
-                              </ol>
-                            </div>
+                                    <button className='add' onClick={() => openCookedModal(recipe)}>Mark as Cooked</button>
 
-                            <button className='add' onClick={() => openCookedModal(recipe)}>Mark as Cooked</button>
+                                    {(recipe.missingIngredients || []).length > 0 && (
+                                        <div className="section">
+                                            <h3>🛒 Missing Ingredients</h3>
+                                            <ul className='missing-list'>
+                                                {recipe.missingIngredients.map((ingredient, i) => {
+                                                    const label = typeof ingredient === "string"
+                                                        ? ingredient
+                                                        : ingredient.name || ingredient.ingredient || JSON.stringify(ingredient)
+                                                    return (
+                                                        <li key={i}>{label.charAt(0).toUpperCase() + label.slice(1)}</li>
+                                                    )
+                                                })}
+                                            </ul>
+                                        </div>
+                                    )}
 
-                            {(recipe.missingIngredients || []).length > 0 && (
-                              <div className="section">
-                                <h3>🛒 Missing Ingredients</h3>
-                                <ul className='missing-list'>
-                                  {recipe.missingIngredients.map((ingredient, i) => {
-                                    const label = typeof ingredient === "string"
-                                    ? ingredient
-                                    : ingredient.name || ingredient.ingredient || JSON.stringify(ingredient)
-                                    return (
-                                      <li key={i}>
-                                        {label.charAt(0).toUpperCase() + label.slice(1)}
-                                      </li>
-                                    )
-                                  })}
-                                </ul>
-                              </div>
-                            )}
-
-                            <div className="cook-time">
-                              <span>
-                                ⏲️ Cook Time: {recipe.cookTime || "Not specified"}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                                    <div className="cook-time">
+                                        <span>⏲️ Cook Time: {recipe.cookTime || "Not specified"}</span>
+                                    </div>
+                                </div>   
+                            )     
+                        })}           
                       </div>
                     )}
                   </>
