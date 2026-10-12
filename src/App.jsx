@@ -69,7 +69,7 @@ export default function App() {
   const checkAuth = async () => {
     try {
       const response = await fetch(
-        "https://fridge-organiser.onrender.com/auth/me",
+        "https://fridge.simonavatcheva.com/auth/me",
         {
           credentials: "include"
         }
@@ -94,7 +94,7 @@ export default function App() {
   const fetchItems = async () => {
     try {
       const response = await fetch(
-        "https://fridge-organiser.onrender.com/items/",
+        "https://fridge.simonavatcheva.com/items/",
         {
           credentials: "include"
         }
@@ -111,7 +111,7 @@ export default function App() {
   const fetchHistory = async () => {
     try {
       const response = await fetch(
-        "https://fridge-organiser.onrender.com/items/history",
+        "https://fridge.simonavatcheva.com/items/history",
         {
           credentials: "include"
         }
@@ -134,7 +134,7 @@ export default function App() {
     try {
       for (const name of names) {
         await fetch(
-          'https://fridge-organiser.onrender.com/items/add',
+          'https://fridge.simonavatcheva.com/items/add',
           {
             method: "POST",
             credentials: "include",
@@ -223,7 +223,7 @@ export default function App() {
       formData.append("file", imageFile)
 
       const response = await fetch(
-        "https://fridge-organiser.onrender.com/detect-items",
+        "https://fridge.simonavatcheva.com/detect-items",
         {
           method: "POST",
           credentials: "include",
@@ -273,7 +273,7 @@ export default function App() {
         for (let i = 0; i < qty; i++){
           promises.push(
             fetch(
-              "https://fridge-organiser.onrender.com/items/add",
+              "https://fridge.simonavatcheva.com/items/add",
               {
                 method: "POST",
                 credentials: "include",
@@ -314,7 +314,7 @@ export default function App() {
   const deleteItem = async (itemId) => {
     try {
       const response = await fetch(
-        `https://fridge-organiser.onrender.com/items/${itemId}`,
+        `https://fridge.simonavatcheva.com/items/${itemId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -337,7 +337,7 @@ export default function App() {
 
       for (const id of idsToDelete) {
         await fetch(
-          `https://fridge-organiser.onrender.com/items/${id}`,
+          `https://fridge.simonavatcheva.com/items/${id}`,
           {
             method: "DELETE",
             credentials: "include"
@@ -354,7 +354,7 @@ export default function App() {
   const generateRecipes = async (cookTime = maxCookTime, servings = servingSize) => {
     setRecipesLoading(true)
     try {
-      const response = await fetch('https://fridge-organiser.onrender.com/recipes', {
+      const response = await fetch('https://fridge.simonavatcheva.com/recipes', {
         method: 'POST',
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -396,7 +396,7 @@ export default function App() {
   const generateImage = async (recipe, index) => {
     setImageLoading(prev => ({ ...prev, [index]: true }))
     try {
-      const res = await fetch('https://fridge-organiser.onrender.com/image', {
+      const res = await fetch('https://fridge.simonavatcheva.com/image', {
         method: 'POST',
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -422,7 +422,7 @@ export default function App() {
           const i = start + offset
           try {
             const res = await fetch(
-              "https://fridge-organiser.onrender.com/image",
+              "https://fridge.simonavatcheva.com/image",
               {
                 method: "POST",
                 credentials: "include",
@@ -487,7 +487,7 @@ export default function App() {
   const fetchSettings = async () => {
     try {
       const res = await fetch(
-        "https://fridge-organiser.onrender.com/settings",
+        "https://fridge.simonavatcheva.com/settings",
         {
           credentials: "include"
         }
@@ -505,7 +505,7 @@ export default function App() {
   const fetchShoppingList = async () => {
     try {
       const res = await fetch(
-        "https://fridge-organiser.onrender.com/shopping/", 
+        "https://fridge.simonavatcheva.com/shopping/", 
         {
           credentials: "include"
         }
@@ -528,7 +528,7 @@ export default function App() {
       for (const itemName of names) {
         for (let i = 0; i < newShoppingQty; i++) {
           await fetch(
-            "https://fridge-organiser.onrender.com/shopping/add",
+            "https://fridge.simonavatcheva.com/shopping/add",
             {
               method: "POST",
               credentials: "include",
@@ -552,7 +552,7 @@ export default function App() {
   const deleteShoppingItem = async (id) => {
     try {
       await fetch(
-        `https://fridge-organiser.onrender.com/shopping/${id}`, 
+        `https://fridge.simonavatcheva.com/shopping/${id}`, 
         {
           method: "DELETE",
           credentials: "include"
@@ -568,7 +568,7 @@ export default function App() {
     if (dontShowAgain) {
       try {
         await fetch(
-          `https://fridge-organiser.onrender.com/items/history/${encodeURIComponent(confirmDeleteAuto)}`,
+          `https://fridge.simonavatcheva.com/items/history/${encodeURIComponent(confirmDeleteAuto)}`,
           {
             method: "DELETE",
             credentials: "include"
@@ -583,7 +583,7 @@ export default function App() {
     } else {
       try {
         await fetch(
-          "https://fridge-organiser.onrender.com/items/dismissed",
+          "https://fridge.simonavatcheva.com/items/dismissed",
           {
             method: "POST",
             credentials: "include",
@@ -603,7 +603,7 @@ export default function App() {
   const fetchDismissed = async () => {
     try {
       const res = await fetch(
-        "https://fridge-organiser.onrender.com/items/dismissed",
+        "https://fridge.simonavatcheva.com/items/dismissed",
         {
           credentials: "include"
         }
@@ -626,7 +626,7 @@ export default function App() {
 
   const logoutUser = async () => {
     await fetch(
-      "https://fridge-organiser.onrender.com/auth/logout",
+      "https://fridge.simonavatcheva.com/auth/logout",
       {
         method: "POST",
         credentials: "include"
@@ -675,7 +675,7 @@ export default function App() {
   const fetchFavourites = async () => {
     try {
       const res = await fetch(
-        "https://fridge-organiser.onrender.com/favourites",
+        "https://fridge.simonavatcheva.com/favourites",
         {
           credentials: "include"
         }
@@ -693,7 +693,7 @@ export default function App() {
 
     if (existing) { 
       await fetch(
-        `https://fridge-organiser.onrender.com/favourites/${existing.id}`,
+        `https://fridge.simonavatcheva.com/favourites/${existing.id}`,
         {
           method: "DELETE",
           credentials: "include"
@@ -701,7 +701,7 @@ export default function App() {
       )
     } else {
       await fetch(
-        "https://fridge-organiser.onrender.com/favourites",
+        "https://fridge.simonavatcheva.com/favourites",
         {
           method: "POST",
           credentials: "include",
@@ -1267,7 +1267,7 @@ export default function App() {
                             <button
                               onClick={async () => {
                                 await fetch(
-                                  "https://fridge-organiser.onrender.com/items/dismissed",
+                                  "https://fridge.simonavatcheva.com/items/dismissed",
                                   {
                                     method: "DELETE",
                                     credentials: "include"
@@ -1363,7 +1363,7 @@ export default function App() {
                                     onClick={async () => {
                                       const idsToDelete = item.ids.slice(0, deleteShoppingAmount[item.name] || 1)
                                       for (const id of idsToDelete) {
-                                        await fetch(`https://fridge-organiser.onrender.com/shopping/${id}`, { method: "DELETE", credentials: "include" })
+                                        await fetch(`https://fridge.simonavatcheva.com/shopping/${id}`, { method: "DELETE", credentials: "include" })
                                       }
                                       setExpandedShoppingItem(null)
                                       fetchShoppingList()

@@ -44,7 +44,13 @@ app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://fridge-organiser-six.vercel.app"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://fridge-organiser-six.vercel.app",
+        "https://simonavatcheva.com",
+        "https://www.simonavatcheva.com",
+        "https://fridge.simonavatcheva.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -14,7 +14,7 @@ export default function Login({ onLogin }) {
         setError("");
 
         try {
-            const response = await fetch("https://fridge-organiser.onrender.com/auth/login", {
+            const response = await fetch("https://fridge.simonavatcheva.com/auth/login", {
                 method: "POST",
                 credentials: "include",
                 headers: {

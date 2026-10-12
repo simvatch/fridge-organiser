@@ -68,7 +68,7 @@ export default function Settings({ isOpen, onClose, settings, setSettings }) {
         const fetchSettings = async () => {
             try {
                 const response = await fetch(
-                     "https://fridge-organiser.onrender.com/settings",
+                     "https://fridge.simonavatcheva.com/settings",
                      {
                         credentials: "include"
                      }
@@ -126,7 +126,7 @@ export default function Settings({ isOpen, onClose, settings, setSettings }) {
     const handleSave = async () => {
         try {
             await fetch(
-                "https://fridge-organiser.onrender.com/settings",
+                "https://fridge.simonavatcheva.com/settings",
                 {
                     method: "POST",
                     credentials: "include",
@@ -154,7 +154,7 @@ export default function Settings({ isOpen, onClose, settings, setSettings }) {
         
         try {
             await fetch(
-                "https://fridge-organiser.onrender.com/settings",
+                "https://fridge.simonavatcheva.com/settings",
                 {
                     method: "POST",
                     credentials: "include",

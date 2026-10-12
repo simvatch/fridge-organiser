@@ -23,7 +23,7 @@ export default function Signup() {
 
         try {
             const response = await fetch(
-                "https://fridge-organiser.onrender.com/auth/signup",
+                "https://fridge.simonavatcheva.com/auth/signup",
                 {
                     method: "POST",
                     credentials: "include",
