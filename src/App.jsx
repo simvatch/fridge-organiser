@@ -142,7 +142,7 @@ export default function App() {
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              name: itemToSubmit,
+              name: name,
               expires_at: newItemExpiry || null
             })
           }
@@ -1454,7 +1454,7 @@ export default function App() {
                               <input
                                 type="date"
                                 value={item.expires_at || ""}
-                                style={{ flex: 1, fontSize: "0.8rem" }}
+                                style={{ flex: 1, fontSize: "0.8rem", width: "100%", maxWidth: "160px" }}
                                 onChange={(e) => {
                                   const updated = detectedItems.map((curr, idx) =>
                                     idx === index ? { ...curr, expires_at: e.target.value } : curr
@@ -1462,7 +1462,6 @@ export default function App() {
                                   setDetectedItems(updated)
                                 }}
                                 className="expiry-input"
-                                style={{ width: "100%", maxWidth: "160px" }}
                               />
                             </div>
                           </div>
