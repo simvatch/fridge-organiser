@@ -11,10 +11,12 @@ async def connect_db():
     if pool is None:
         pool = await asyncpg.create_pool(
             DATABASE_URL,
-            min_size=1,
+            min_size=0,
             max_size=5,
             statement_cache_size=0,
-            command_timeout=60
+            command_timeout=60,
+            # Close idle connections quickly so Neon can scale to zero
+            max_inactive_connection_lifetime=60
         )
 
 async def disconnect_db():
